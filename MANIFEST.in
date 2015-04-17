@@ -1,0 +1,13 @@
+recursive-include lnpy *.py *.c *.cpp *.h *.pyx *.pxd
+include lnpy/transform/src/gammatone/README
+include lnpy/learn/src/code/COPYRIGHT
+exclude lnpy/transform/src/gammatone/Gfb_analyze.*
+exclude lnpy/lnp/util_extra.py
+exclude lnpy/database.py
+exclude lnpy/io/setup.py
+exclude lnpy/io/plexollinio.py
+prune lnpy/io/pyplx
+exclude lnpy/learn/tsne.pyx
+prune lnpy/learn/src/bh_tsne
+prune lnpy/io
+
