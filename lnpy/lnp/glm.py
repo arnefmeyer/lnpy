@@ -15,6 +15,7 @@ import time
 
 from base import LNPEstimator
 from ..learn.grid_search import ParamSearchCV
+from ..learn import LogLoss
 from ..learn import GaussianPrior
 from ..learn.glm import BernoulliGLM as _BernoulliGLM
 from ..learn.glm import PoissonGLM as _PoissonGLM
@@ -246,9 +247,11 @@ class _SGDGLM(SKBaseEstimator):
 
         if self.family.lower() == 'poisson':
             if self.link.lower() == 'log':
-                loss = 'poisson_log'
+                loss = LogLoss()
+#                loss = 'poisson_log'
             elif self.link.lower() == 'modified_log':
-                loss = 'poisson_modified_log'
+#                loss = 'poisson_modified_log'
+                loss = LogLoss()
             else:
                 raise ValueError("Unknown link:", self.link)
         else:
@@ -314,6 +317,10 @@ class _SGDGLM(SKBaseEstimator):
         self.coef_ = model.w
         self.intercept_ = model.b
 
+    def predict(self, X):
+
+        return np.dot(X, self.coef_) + self.intercept_
+
 
 class StochasticGLM(LNPEstimator):
     """Stochastic gradient descent approximation to GLM
@@ -367,9 +374,11 @@ class StochasticGLM(LNPEstimator):
     def __init__(self, optimize=True, metric='logli_poissonexp',
                  family='poisson', link='log', alpha=0.01, n_epochs=1,
                  algorithm='sgd',
-                 suffix='', verbose=1, weighting='permutation', n_jobs=None,
-                 param_range=None, avg_decay=2., warm_start=False,
-                 n_iter=5, n_steps=7, bias_multiplier=1.):
+                 suffix='', verbose=1, weighting='permutation',
+                 avg_decay=2., warm_start=False,
+                 bias_multiplier=1., **kwargs):
+
+        super(StochasticGLM, self).__init__(**kwargs)
 
         self.optimize = optimize
         self._alpha = alpha
@@ -378,11 +387,11 @@ class StochasticGLM(LNPEstimator):
         self.algorithm = algorithm
         self.suffix = suffix
         self.verbose = verbose
-        self.n_jobs = n_jobs
-        self.param_range = param_range
+#        self.n_jobs = n_jobs
+#        self.param_range = param_range
         self.avg_decay = avg_decay
-        self.n_iter = n_iter
-        self.n_steps = n_steps
+#        self.n_iter = n_iter
+#        self.n_steps = n_steps
 
         self.t_total = 0.
         self.t_fit = 0.
@@ -426,26 +435,43 @@ class StochasticGLM(LNPEstimator):
         self.t_fit = 0.
         self.t_total = 0
 
-    def learn(self, X, Y):
+    def fit(self, X, Y):
         """Train model and extract parameters"""
 
         if self.optimize:
 
-            # Grid search parameters
-            lower = 2. ** -30
-            upper = 2. ** 2
-            if self.param_range is not None:
-                lower = self.param_range[0]
-                upper = self.param_range[1]
+            grid_params = self.grid_params
 
-            alpha_values = np.power(2., np.linspace(np.log2(lower),
-                                                    np.log2(upper),
-                                                    self.n_steps))
-            param_grid = {'alpha': alpha_values}
-            param_info = {'alpha': {'scaling': 'log2'}}
-            grid = ParamSearchCV(self.__model__, param_grid, param_info,
-                                 n_iter=self.n_iter, n_jobs=self.n_jobs,
-                                 verbose=self.verbose, metric=self.metric)
+            if 'param_grid' not in grid_params.keys() or \
+                    grid_params['param_grid'] is None:
+
+                lower = 2. ** -30
+                upper = 2. ** 2
+                n_steps = 7
+
+                alpha_values = np.power(2., np.linspace(np.log2(lower),
+                                                        np.log2(upper),
+                                                        n_steps))
+                param_grid = {'alpha': alpha_values}
+                param_info = {'alpha': {'scaling': 'log2'}}
+
+                grid_params['param_grid'] = param_grid
+                grid_params['param_info'] = param_info
+
+#            = dict(n_griditer=n_griditer, n_jobs=n_jobs,
+#                                verbose=verbose, param_grid=param_grid,
+#                                param_info=param_info)
+
+            # Grid search parameters
+
+#            if self.param_range is not None:
+#                lower = self.param_range[0]
+#                upper = self.param_range[1]
+
+#            grid = ParamSearchCV(self.__model__, param_grid,
+#                                 scorer=self.metric, **grid_params)
+            grid = ParamSearchCV(self.__model__, scorer=self.metric,
+                                 **grid_params)
 
             t0 = time.time()
             grid.fit(X, Y)
@@ -466,3 +492,4 @@ class StochasticGLM(LNPEstimator):
 
             self.t_fit = t_fit
             self.t_total = t_fit
+

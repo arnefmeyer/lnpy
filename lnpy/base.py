@@ -500,6 +500,7 @@ class Spectrogram(Signal):
             cbar = plt.colorbar(im, ax=ax)
             cbar.locator = MaxNLocator(5)
             cbar.update_ticks()
+            cbar.ax.tick_params(axis='both', labelsize=10)
 
         if show_now:
             plt.show()

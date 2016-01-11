@@ -93,6 +93,21 @@ def _calc_MSE(Y, z):
     return mse
 
 
+def _calc_PredPower(Y, z):
+
+    if Y.ndim > 1:
+        y = Y.mean(axis=1)
+    else:
+        y = Y
+
+    pred_err = np.mean((z - y) ** 2)
+    pred_pow = np.var(Y, ddof=1)
+
+    pp = pred_pow - pred_err
+
+    return pp
+
+
 scorer_BernoulliLL = make_scorer(_calc_BernoulliLL, greater_is_better=True,
                                  needs_threshold=False)
 
@@ -115,6 +130,10 @@ scorer_ModPoissonLL = make_scorer(_calc_ModPoissonLL,
 
 scorer_MSE = make_scorer(_calc_MSE, greater_is_better=False,
                          needs_threshold=False)
+
+scorer_PredPower = make_scorer(_calc_PredPower,
+                               greater_is_better=True,
+                               needs_threshold=False)
 
 _calc_r_squared = r2_score
 scorer_r_squared = make_scorer(_calc_r_squared, greater_is_better=True,
@@ -288,7 +307,8 @@ class CVEvaluator():
     """
 
     def __init__(self, model, scorers, n_folds=5, verbose=True,
-                 eval_folds='all', stratify_folds=False, random_state=0):
+                 eval_folds='all', stratify_folds=False, random_state=0,
+                 save_coef=True):
 
         self.model = model
         self.n_folds = n_folds
@@ -297,6 +317,7 @@ class CVEvaluator():
         self.eval_folds = eval_folds
         self.stratify_folds = stratify_folds
         self.random_state = random_state
+        self.save_coef = save_coef
 
         self.results = None
         self.K = None
@@ -357,7 +378,7 @@ class CVEvaluator():
                 model_copy = _clone_estimator(model)
                 model_copy.fit(X[train_index, :], y_train)
 
-                if hasattr(model_copy, 'coef_'):
+                if self.save_coef and hasattr(model_copy, 'coef_'):
                     K.append(model_copy.coef_)
 
                 # Evaluate model

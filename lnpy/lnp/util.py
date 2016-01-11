@@ -279,9 +279,9 @@ class DataConverter(object):
 
                 spike_ind = np.array(np.round((train - t0 * pq.s) *
                                      self.samplerate), dtype=int)
-                spike_ind -= n_temp - 1  # 0: 0.537, -1: 0.552, -2: 0.560
+                spike_ind -= n_temp - 1
                 spike_ind = spike_ind[spike_ind < n_samples]
-#                Y[spike_idx, j] = 1
+
                 for ii in spike_ind:
                     Y[ii, j] += 1
 

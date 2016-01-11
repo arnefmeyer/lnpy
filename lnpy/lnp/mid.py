@@ -64,7 +64,7 @@ class MID(LNPEstimator):
     def name(self):
         return 'MID'
 
-    def learn(self, X, Y):
+    def fit(self, X, Y):
         """Estimates RF from given data by MI maximization
 
             Inputs:
