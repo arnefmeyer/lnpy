@@ -17,9 +17,7 @@ from sklearn.cross_validation import StratifiedKFold, KFold
 from sklearn.metrics import make_scorer, r2_score, roc_auc_score
 from sklearn.base import clone as _clone_estimator
 
-from ..lnp.util import (
-    calcAUC, calcMI, calcCoherence, calcLogLikelihood
-)
+from ..lnp.util import calcMI, calcCoherence, calcLogLikelihood
 
 
 def _calc_AUC(Y, z):

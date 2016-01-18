@@ -39,6 +39,9 @@ class SVM(LinearBaseEstimator):
 
     def fit(self, X, Y, is_sparse=True):
 
+        X = np.require(X, dtype=np.float64, requirements=['C', 'A'])
+        Y = np.require(Y, dtype=np.float64, requirements=['C', 'A'])
+
         Y = Y.astype(np.float64)
         bias = self.bias_multiplier
         N, p = X.shape

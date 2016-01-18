@@ -40,9 +40,6 @@ from ..learn import GaussianPrior, SquaredHingeLoss
 from ..learn.grid_search import ParamSearchCV
 
 
-#from ipdb import set_trace as db
-
-
 class CbRF(LNPEstimator):
     """Classification-based RF estimation class
 
@@ -89,6 +86,9 @@ class CbRF(LNPEstimator):
 
         prior = self.prior
         n_spikefilt = self.n_spikefilt
+
+        X = np.require(X, dtype=np.float64, requirements=['C', 'A'])
+        Y = np.require(Y, dtype=np.float64, requirements=['C', 'A'])
 
         if n_spikefilt > 0:
             nx = X.shape[1]
@@ -257,6 +257,9 @@ class StochasticCbRF(LNPEstimator):
     def fit(self, X, Y):
         """Train model and extract parameters"""
 
+        X = np.require(X, dtype=np.float64, requirements=['C', 'A'])
+        Y = np.require(Y, dtype=np.float64, requirements=['C', 'A'])
+        
         model = self.__model__
 
         labels = np.unique(Y)
