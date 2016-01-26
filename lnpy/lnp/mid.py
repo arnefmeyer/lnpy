@@ -55,8 +55,8 @@ class MID(LNPEstimator):
         self.n_iter2 = n_iter2
         if n_iter2 is None:
             self.n_iter2 = n_iter
-        self.w = None
-        self.b = 0.
+        self.coef_ = None
+        self.intercept_ = 0.
         self.__exe_1D = join(location, 'mid1d')
         self.__exe_2D = join(location, 'midnd')
 
@@ -121,13 +121,13 @@ class MID(LNPEstimator):
             # Read first MID from binary file
             if self.ndim == 1:
                 dat_file = join(temp, prefix + '-1D-n1-v1-p1.dat')
-                self.w = np.fromfile(dat_file, dtype=np.double)
+                self.coef_ = np.fromfile(dat_file, dtype=np.double)
 
             elif self.ndim > 1:
                 dat_file1 = join(temp, prefix + '-ND-n2-v1-p1.dat')
                 dat_file2 = join(temp, prefix + '-ND-n2-v2-p1.dat')
-                self.w = [np.fromfile(dat_file1, dtype=np.double),
-                          np.fromfile(dat_file2, dtype=np.double)]
+                self.coef_ = [np.fromfile(dat_file1, dtype=np.double),
+                              np.fromfile(dat_file2, dtype=np.double)]
 
         finally:
             # Clean up

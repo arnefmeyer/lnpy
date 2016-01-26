@@ -11,7 +11,8 @@ cdef extern from "src/code/helper.h":
         int get_ndim()
         int get_ntrials()
         void set_C(double *c)
-        void set_permutation(int k, unsigned long *ind)
+#        void set_permutation(int k, unsigned long *ind)
+        void set_permutation(int k, uint64_t *ind)
         void reset_index()
         double *get_Y()
 

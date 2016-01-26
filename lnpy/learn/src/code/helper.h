@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <iostream>
+#include <stdint.h>
 
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -23,7 +24,8 @@ struct feature_node
 	double value;
 };
 
-typedef unsigned long int index_t;
+//typedef unsigned long int index_t;
+typedef uint64_t index_t;
 typedef typename std::vector<feature_node*> FeatureMatrix;
 
 
