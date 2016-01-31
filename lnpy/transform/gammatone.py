@@ -93,6 +93,9 @@ class GammatoneFilter:
 
         # equation (1), line 2 [Hohmann 2002]:
         self.coef = lamda * np.exp(0 + 1j*beta)
+        if not np.isscalar(self.coef):
+            # make sure that coef is a scalar
+            self.coef = self.coef.item()
 
         # normalization factor from section 2.2 (text) [Hohmann 2002]:
         self.normalization_factor = 2. * (1 - np.abs(self.coef)) ** order
