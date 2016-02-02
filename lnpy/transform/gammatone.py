@@ -157,11 +157,17 @@ class GammatoneFilterbank(BaseTransform):
 
         warm_start : boolean
             Use filter states from previous run? (default: false)
+
+        chunk_size : int
+            Process signal in multiple chunks or a single chunk if
+            chunk_size is None (default: None). Note: currently only
+            works for signals with a single channel.
     """
 
     def __init__(self, samplerate=16000., f_cutoff=(250., 6700.),
                  f_carrier=1000., filt_per_erb=1.0, order=4,
-                 bw_factor=1., spectype='complex', warm_start=False):
+                 bw_factor=1., spectype='complex', warm_start=False,
+                 chunk_size=None, verbose=False, dtype=np.float64):
 
         order = np.uint8(order)
 
@@ -173,6 +179,8 @@ class GammatoneFilterbank(BaseTransform):
         self.spectype = spectype.lower()
         self.f_carrier = f_carrier
         self.warm_start = warm_start
+        self.chunk_size = chunk_size
+        self.verbose = verbose
 
         if isinstance(f_cutoff, (int, float)):
             f_center = [f_cutoff]
@@ -237,13 +245,40 @@ class GammatoneFilterbank(BaseTransform):
         x, _, t0 = self._parse_arguments(signal)
 
         if x.ndim == 1:
+
             if not x.flags['C_CONTIGUOUS']:
                 x = np.ascontiguousarray(x)
 
             pars = self._unpack_params()
-            tmp = wrapper.process(len(self.filters), self.order, pars[0],
-                                  pars[1], pars[2], pars[3], pars[4], x)
-            tmp = self._convert_spectrum_type(tmp, self.spectype)
+            spectype = self.spectype
+            chunk_size = self.chunk_size
+            fs = self.samplerate
+
+            if chunk_size is None:
+                chunk_ind = [(0, x.shape[0] - 1)]
+            else:
+                N = x.shape[0]
+                samples_per_chunk = int(np.ceil(chunk_size * fs))
+                n_chunks = int(np.ceil(float(N) / samples_per_chunk))
+
+                chunk_ind = []
+                for i in range(n_chunks):
+                    chunk_ind.append((i*samples_per_chunk,
+                                      min((i+1) * samples_per_chunk-1, N-1)))
+
+            n_channels = len(self.filters)
+            tmp = np.zeros((N, n_channels), dtype=np.float)
+            for i, ii in enumerate(chunk_ind):
+
+                if self.verbose:
+                    print "processing chunk {}/{}".format(i+1, n_chunks)
+
+                xx = wrapper.process(n_channels, self.order,
+                                     pars[0], pars[1], pars[2], pars[3],
+                                     pars[4], x[ii[0]:ii[1]])
+
+                tmp[ii[0]:ii[1], :] = self._convert_spectrum_type(xx,
+                                                                  spectype)
 
             if self.warm_start:
                 self._update_filter_states(pars[3], pars[4])
