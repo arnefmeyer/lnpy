@@ -207,7 +207,7 @@ class StochasticCbRF(LNPEstimator):
         self.avg_decay = avg_decay
         self.eta0 = eta0
 
-        if algorithm == 'sklearn':
+        if algorithm.upper() == 'SKLEARN':
             model = SGDClassifier(loss=loss, penalty='l2',
                                   fit_intercept=True, n_iter=n_epochs,
                                   alpha=alpha, learning_rate='optimal',
@@ -215,18 +215,19 @@ class StochasticCbRF(LNPEstimator):
                                   shuffle=True, random_state=0,
                                   verbose=False)
 
-        elif algorithm == 'sgd':
+        elif algorithm.upper() == 'SGD':
             model = SGD(loss=loss, fit_bias=True,
                         n_epochs=n_epochs, alpha=alpha,
                         permutation=permutation, weighting=weighting,
                         rand_seed=0)
 
-        elif algorithm == 'asgd':
+        elif algorithm.upper() == 'ASGD':
             model = ASGD(loss=loss, n_epochs=n_epochs,
                          alpha=alpha, fit_bias=True, permutation=permutation,
                          weighting=weighting, start_avg=0, rand_seed=0,
                          avg_decay=avg_decay)
-
+        else:
+            raise ValueError('Invalid fitting algorithm: {}'.format(algorithm))
         self.__model__ = model
 
     @property
@@ -259,7 +260,7 @@ class StochasticCbRF(LNPEstimator):
 
         X = np.require(X, dtype=np.float64, requirements=['C', 'A'])
         Y = np.require(Y, dtype=np.float64, requirements=['C', 'A'])
-        
+
         model = self.__model__
 
         labels = np.unique(Y)
@@ -278,15 +279,31 @@ class StochasticCbRF(LNPEstimator):
         if self.optimize:
 
             # Grid search parameters
-            lower = 2. ** -30
-            upper = 2. ** 2
-            if self.param_range is not None:
-                lower = self.param_range[0]
-                upper = self.param_range[1]
+#            lower = 2. ** -30
+#            upper = 2. ** 2
+#            if self.param_range is not None:
+#                lower = self.param_range[0]
+#                upper = self.param_range[1]
+#
+#            alpha_values = np.power(2., np.linspace(np.log2(lower),
+#                                                    np.log2(upper), 7))
 
-            alpha_values = np.power(2., np.linspace(np.log2(lower),
-                                                    np.log2(upper), 7))
-            param_grid = {'alpha': alpha_values}
+            grid_params = self.grid_params
+            if 'param_grid' not in grid_params.keys() or \
+                    grid_params['param_grid'] is None:
+
+                if self.param_range is not None:
+                    lower = self.param_range[0]
+                    upper = self.param_range[1]
+                else:
+                    lower = 2. ** -30
+                    upper = 2. ** 2
+
+                param_grid = 2. ** np.linspace(np.log2(lower),
+                                               np.log2(upper), 7)
+            else:
+                param_grid = grid_params['param_grid']
+
             param_info = {'alpha': {'scaling': 'log2'}}
             grid = ParamSearchCV(model, param_grid, param_info,
                                  scorer=self.metric, fit_final=True)

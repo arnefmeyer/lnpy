@@ -193,6 +193,8 @@ class ASGD(BaseSGDEstimator):
                 raise ValueError('X and Y must contain the same number of '
                                  'observations!')
 
+            Y = np.require(Y, dtype=np.float64, requirements=['C'])
+
             bias = self.bias_multiplier
             n_epochs = self.n_epochs
             loss = self.loss
