@@ -248,23 +248,21 @@ class _SGDGLM(SKBaseEstimator):
         if self.family.lower() == 'poisson':
             if self.link.lower() == 'log':
                 loss = LogLoss()
-#                loss = 'poisson_log'
             elif self.link.lower() == 'modified_log':
-#                loss = 'poisson_modified_log'
                 loss = LogLoss()
             else:
                 raise ValueError("Unknown link:", self.link)
         else:
             raise ValueError("Unknown family:", self.family)
 
-        if self.algorithm.lower() == 'sgd':
+        if self.algorithm.upper() == 'SGD':
             model = SGD(loss=loss, fit_bias=True,
                         n_epochs=self.n_epochs, alpha=alpha,
                         class_weight=class_weight, rand_seed=0,
                         permutation=permutation, warm_start=True,
                         bias_multiplier=bias_multiplier)
 
-        elif self.algorithm.lower() == 'asgd':
+        elif self.algorithm.upper() == 'ASGD':
             model = ASGD(loss=loss, n_epochs=self.n_epochs,
                          alpha=alpha, class_weight=class_weight,
                          fit_bias=True, permutation=permutation,
@@ -314,8 +312,8 @@ class _SGDGLM(SKBaseEstimator):
         else:
             model.fit(X, Y.flatten().astype(np.int8))
 
-        self.coef_ = model.w
-        self.intercept_ = model.b
+        self.coef_ = model.get_weights()
+        self.intercept_ = model.get_bias()
 
     def predict(self, X):
 
@@ -371,7 +369,7 @@ class StochasticGLM(LNPEstimator):
             Permute samples from spike and no spike classes or use inverse
             class priors?
     """
-    def __init__(self, optimize=True, metric='logli_poissonexp',
+    def __init__(self, optimize=True, metric='PoissonLL',
                  family='poisson', link='log', alpha=0.01, n_epochs=1,
                  algorithm='sgd',
                  suffix='', verbose=1, weighting='permutation',
@@ -387,11 +385,7 @@ class StochasticGLM(LNPEstimator):
         self.algorithm = algorithm
         self.suffix = suffix
         self.verbose = verbose
-#        self.n_jobs = n_jobs
-#        self.param_range = param_range
         self.avg_decay = avg_decay
-#        self.n_iter = n_iter
-#        self.n_steps = n_steps
 
         self.t_total = 0.
         self.t_fit = 0.
@@ -428,6 +422,12 @@ class StochasticGLM(LNPEstimator):
     def alpha(self, value):
         self.__model__.alpha = value
 
+    def get_weights(self):
+        return self.w
+
+    def get_bias(self):
+        return self.b
+
     def reset(self):
         """Resets algorithm parameters to initial values"""
         self.__model__.coef_ = None
@@ -458,18 +458,6 @@ class StochasticGLM(LNPEstimator):
                 grid_params['param_grid'] = param_grid
                 grid_params['param_info'] = param_info
 
-#            = dict(n_griditer=n_griditer, n_jobs=n_jobs,
-#                                verbose=verbose, param_grid=param_grid,
-#                                param_info=param_info)
-
-            # Grid search parameters
-
-#            if self.param_range is not None:
-#                lower = self.param_range[0]
-#                upper = self.param_range[1]
-
-#            grid = ParamSearchCV(self.__model__, param_grid,
-#                                 scorer=self.metric, **grid_params)
             grid = ParamSearchCV(self.__model__, scorer=self.metric,
                                  **grid_params)
 
@@ -492,4 +480,3 @@ class StochasticGLM(LNPEstimator):
 
             self.t_fit = t_fit
             self.t_total = t_fit
-
