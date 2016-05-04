@@ -346,10 +346,10 @@ class CVEvaluator():
                 y = Y
             else:
                 y = np.sum(Y, axis=1)
-            cv = StratifiedKFold(y, n_folds=n_folds, indices=True)
+            cv = StratifiedKFold(y, n_folds=n_folds)  # , indices=True)
 
         else:
-            cv = KFold(X.shape[0], n_folds, indices=True,
+            cv = KFold(X.shape[0], n_folds,  # indices=True,
                        random_state=random_state)
 
         results = {'n_folds': n_folds, 'scorers': scorer_names,
