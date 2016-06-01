@@ -254,10 +254,13 @@ class GammatoneFilterbank(BaseTransform):
             chunk_size = self.chunk_size
             fs = self.samplerate
 
+            N = x.shape[0]
             if chunk_size is None:
-                chunk_ind = [(0, x.shape[0] - 1)]
+                # single chunk
+                chunk_ind = [(0, N - 1)]
+
             else:
-                N = x.shape[0]
+                # multiple (equal-sized) chunks
                 samples_per_chunk = int(np.ceil(chunk_size * fs))
                 n_chunks = int(np.ceil(float(N) / samples_per_chunk))
 
