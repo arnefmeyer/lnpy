@@ -66,11 +66,29 @@ class BaseTransform(object):
         elif spectype.lower() in ['abs', 'magnitude', 'envelope']:
             x = np.abs(x)
 
-        elif 'rand' in spectype.lower():
-            x = np.abs(x)
-
         else:
             raise ValueError("Unknown spectrum representation:",
                              spectype)
 
         return x
+
+    def _get_spec_dtype(self, spectype):
+
+        if spectype.lower() == 'complex':
+            return np.complex
+
+        elif spectype.lower() in ['phase', 'angle']:
+            return np.float
+
+        elif spectype.lower() in ['re', 'real']:
+            return np.float
+
+        elif spectype.lower() in ['im', 'imag']:
+            return np.float
+
+        elif spectype.lower() in ['abs', 'magnitude', 'envelope']:
+            return np.float
+
+        else:
+            raise ValueError("Unknown spectrum representation:",
+                             spectype)

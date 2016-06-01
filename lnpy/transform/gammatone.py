@@ -270,7 +270,8 @@ class GammatoneFilterbank(BaseTransform):
                                       min((i+1) * samples_per_chunk-1, N-1)))
 
             n_channels = len(self.filters)
-            tmp = np.zeros((N, n_channels), dtype=np.float)
+            tmp = np.zeros((N, n_channels),
+                           dtype=self._get_spec_dtype(self.spectype))
             for i, ii in enumerate(chunk_ind):
 
                 if self.verbose:
