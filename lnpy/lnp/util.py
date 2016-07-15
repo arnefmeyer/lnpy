@@ -48,11 +48,13 @@ class ModelBootstrapper(object):
 
     """
 
-    def __init__(self, model, size=0.1, runs=100, verbose=False):
+    def __init__(self, model, size=0.1, runs=100, verbose=False,
+                 random_seed=None):
 
         self.size = size
         self.runs = runs
         self.verbose = verbose
+        self.random_seed = random_seed
 
         if hasattr(model, 'optimize'):
             self.model = deepcopy(model)
@@ -92,6 +94,8 @@ class ModelBootstrapper(object):
         bs_size = self.size
         bs_samples = int(np.round(bs_size * n_samples))
 
+        rng = np.random.RandomState(self.random_seed)
+
         if self.verbose:
             print "----------------- Bootstrapping model -----------------",
 
@@ -101,10 +105,10 @@ class ModelBootstrapper(object):
             if self.verbose and (i+1) % 10 == 0:
                 update_progress((i+1) / n_runs)
 
-            perm_stim = np.random.permutation(n_samples)
+            perm_stim = rng.permutation(n_samples)
             stim_idx = perm_stim[:bs_samples]
 
-            perm_resp = np.random.permutation(stim_idx.shape[0])
+            perm_resp = rng.permutation(stim_idx.shape[0])
             resp_idx = stim_idx[perm_resp]
 
             if Y.ndim == 1:
@@ -924,8 +928,8 @@ def create_onset_rf(size_x, size_y, mu_x, mu_y, sigma_x, sigma_y):
     x = 1. + np.arange(size_x)
     y = 1. + np.arange(size_y)
     xx, yy = np.meshgrid(x, y)
-    G = np.exp(- np.power(xx - mu_x, 2) / (2. * sigma_x)
-               - np.power(yy - mu_y, 2) / (2. * sigma_y))
+    G = np.exp(- np.power(xx - mu_x, 2) / (2. * sigma_x) -
+               np.power(yy - mu_y, 2) / (2. * sigma_y))
     G *= (yy - mu_y)
     G /= np.amax(np.abs(G))
 
@@ -939,8 +943,8 @@ def create_gabor_rf(size_x, size_y, mu_x, mu_y, sigma_x, sigma_y,
     y = 1. + np.arange(size_y)
     xx, yy = np.meshgrid(x, y)
 
-    G = np.exp(- np.power(xx - mu_x, 2) / (2. * sigma_x)
-               - np.power(yy - mu_y, 2) / (2. * sigma_y))
+    G = np.exp(- np.power(xx - mu_x, 2) / (2. * sigma_x) -
+               np.power(yy - mu_y, 2) / (2. * sigma_y))
 
     phi = 2. * np.pi * (angle/360.)
     xxr = xx * np.cos(phi)
@@ -1013,7 +1017,7 @@ def createGrating(size=(25, 25), angle=45., phase=0.0, f=0.5):
 
 
 def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
-                   whiten=False):
+                   whiten=False, random_seed=None):
     """Create ensemble of sinusoidal gratings with random parameters
 
     Parameters
@@ -1042,16 +1046,19 @@ def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
     y = np.linspace(-1., 1., ny)
     xx, yy = np.meshgrid(x, y)
 
+    # for reproducible results
+    rng = np.random.RandomState(random_seed)
+
     # Create gratings using randomly drawn parameters
     G = np.zeros((N, size[0]*size[1]), dtype=dtype, order='C')
     for i in range(int(N)):
-        angle = np.random.rand(1) * 180
-        phase = np.random.rand(1) * 2 * np.pi
-        f = np.random.rand(1)
+        angle = rng.rand(1) * 180
+        phase = rng.rand(1) * 2 * np.pi
+        f = rng.rand(1)
         G[i, :] = createGrating(size, angle, phase, f).ravel()
 
     if whiten:
-        G, _ = whiten_matrix(G, eps=1e-10)
+        G, _ = whiten_matrix(G, eps=1e-8)
 
     if center:
         G -= np.mean(G, axis=0)
@@ -1060,20 +1067,22 @@ def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
 
 
 def loadImages(location, samples=10**2, size=(25, 25), center=True,
-               randomize=False, scale=0.5, images=10,
+               randomize=False, random_seed=None, scale=0.5, images=10,
                normalize=True, dtype=np.float64, remove_dc=True):
     """Load van Hateren images and recast them as vectors in a stimulus matrix
 
     """
 
-    img_dir = location
+    rng = np.random.RandomState(random_seed)
 
     # Get all image files
-    img_files = [f for f in listdir(img_dir) if isfile(join(img_dir, f))
-                 and f.endswith('.iml')]
+    img_dir = location
+    img_files = [f for f in listdir(img_dir)
+                 if isfile(join(img_dir, f)) and f.endswith('.iml')]
     img_files.sort()
+
     if randomize:
-        idx = np.random.permutation(len(img_files))
+        idx = rng.permutation(len(img_files))
         img_files = img_files[idx]
 
     if images < len(img_files):
@@ -1108,8 +1117,8 @@ def loadImages(location, samples=10**2, size=(25, 25), center=True,
         for p in range(samples_per_image):
 
             # Randomly select patch
-            x0 = np.random.randint(0, width - size[1] + 1)
-            y0 = np.random.randint(0, height - size[0] + 1)
+            x0 = rng.randint(0, width - size[1] + 1)
+            y0 = rng.randint(0, height - size[0] + 1)
             region = D[y0:y0+size[0], x0:x0+size[1]]
 
             # Store patch in data matrix
