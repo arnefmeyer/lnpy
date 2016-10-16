@@ -18,12 +18,12 @@ def configuration(parent_package='', top_path=None):
     if os.name == 'posix':
         libraries.append('m')
 
-    sources = ['fast_tools.cpp']
+    sources = ['network_fast.cpp']
     includes = [numpy.get_include()]
 
     compile_args = ['-O3']
 
-    config.add_extension('fast_tools', sources=sources,
+    config.add_extension('network_fast', sources=sources,
                          libraries=libraries,
                          include_dirs=includes,
                          extra_compile_args=compile_args,

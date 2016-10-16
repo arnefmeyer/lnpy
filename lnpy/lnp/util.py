@@ -1017,7 +1017,8 @@ def createGrating(size=(25, 25), angle=45., phase=0.0, f=0.5):
 
 
 def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
-                   whiten=False, random_seed=None):
+                   whiten=False, random_seed=None, f_min=0., f_max=1.,
+                   order='C'):
     """Create ensemble of sinusoidal gratings with random parameters
 
     Parameters
@@ -1037,6 +1038,18 @@ def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
     whiten : boolean
         PCA-based whitening of grating matrix?
 
+    random_seed : int or None
+        Random seed for numpy.random.RandomState
+
+    f_min : float
+        Lower normalized spatial frequency
+
+    f_max : float
+        Upper normalized spatial frequency
+
+    order : str
+        Flatten gratings in 'C' or 'F' order. The output will always be in
+        'C' order.
     """
 
     # Create x-y grid
@@ -1052,10 +1065,11 @@ def createGratings(size=(25, 25), N=10**4, center=True, dtype=np.float64,
     # Create gratings using randomly drawn parameters
     G = np.zeros((N, size[0]*size[1]), dtype=dtype, order='C')
     for i in range(int(N)):
+
         angle = rng.rand(1) * 180
         phase = rng.rand(1) * 2 * np.pi
-        f = rng.rand(1)
-        G[i, :] = createGrating(size, angle, phase, f).ravel()
+        f = f_min + rng.rand(1) * (f_max - f_min)
+        G[i, :] = createGrating(size, angle, phase, f).ravel(order=order)
 
     if whiten:
         G, _ = whiten_matrix(G, eps=1e-8)
