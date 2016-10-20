@@ -27,10 +27,8 @@ def _calc_AUC(Y, z):
         AUC = np.zeros((n_trials,))
         for i in range(n_trials):
             y = np.ascontiguousarray(Y[:, i])
-#            AUC[i] = calcAUC(y, z)
-            AUC[i] = roc_auc_score(y, z)  # , average='micro')
+            AUC[i] = roc_auc_score(y, z)
     else:
-#        AUC = calcAUC(Y, z)
         AUC = roc_auc_score(Y, z)
 
     return np.mean(AUC)
@@ -106,6 +104,17 @@ def _calc_PredPower(Y, z):
     return pp
 
 
+def _calc_r_squared(Y, z):
+
+    if Y.ndim > 1:
+        y = Y.mean(axis=1)
+    else:
+        y = Y
+
+    r2 = r2_score(y, z)
+    return r2
+
+
 scorer_BernoulliLL = make_scorer(_calc_BernoulliLL, greater_is_better=True,
                                  needs_threshold=False)
 
@@ -133,7 +142,6 @@ scorer_PredPower = make_scorer(_calc_PredPower,
                                greater_is_better=True,
                                needs_threshold=False)
 
-_calc_r_squared = r2_score
 scorer_r_squared = make_scorer(_calc_r_squared, greater_is_better=True,
                                needs_threshold=False)
 
