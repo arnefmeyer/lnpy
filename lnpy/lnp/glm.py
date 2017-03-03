@@ -323,8 +323,16 @@ class _SGDGLM(SKBaseEstimator):
 class StochasticGLM(LNPEstimator):
     """Stochastic gradient descent approximation to GLM
 
-        Approximates the solution to the CbRF method by stochastic gradient
-        descent.
+        Approximates the solution to a GLM using stochastic gradient
+        descent. Both plain SGD and Polynomial decay-averaging SGD (ASGD)
+        are supported. For standard averaged SGD set the decay factor
+        ("avg_decay") to zero.
+
+        For details see
+
+        Meyer et al. Fast and robust estimation of spectro-temporal receptive
+        fields using stochastic approximations. J Neurosci Methods, 2015, 246,
+        119-133.
 
                Parameters
         ----------

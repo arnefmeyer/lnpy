@@ -18,6 +18,8 @@ def configuration(parent_package='', top_path=None):
 
     config.add_subpackage('transform')
     config.add_subpackage('lnp')
+    config.add_subpackage('linear')
+    config.add_subpackage('multilinear')
     config.add_subpackage('learn')
     config.add_subpackage('io')
 

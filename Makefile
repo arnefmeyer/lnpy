@@ -25,6 +25,7 @@ cython:
 	$(CYTHON) --cplus lnpy/learn/pyhelper.pyx
 	$(CYTHON) --cplus lnpy/lnp/fast_tools.pyx
 	$(CYTHON) lnpy/transform/wrap_gtfb.pyx
+	$(CYTHON) lnpy/multilinear/context/context_fast.pyx
 	
 doc: inplace
 	$(MAKE) -C doc html

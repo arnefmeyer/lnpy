@@ -13,7 +13,7 @@ from distutils.command.clean import clean as _clean
 DESCRIPTION = 'A python module for stimulus-response function estimation'
 
 fpath = os.path.split(__file__)[0]
-with open(os.path.join(fpath, 'README')) as f:
+with open(os.path.join(fpath, 'README.md')) as f:
     LONG_DESCRIPTION = f.read()
 
 
@@ -62,7 +62,7 @@ def setup_package():
                     description=DESCRIPTION,
                     license='GPLv3',
                     url='http://www.github.com/arnefmeyer/lnpy',
-                    version='0.1',
+                    version='0.2',
                     download_url='http://www.github.com/arnefmeyer/lnpy',
                     long_description=LONG_DESCRIPTION,
                     classifiers=['Intended Audience :: Science/Research',
@@ -78,16 +78,15 @@ def setup_package():
                                  ],
                     cmdclass=cmdclass)
 
-    if (len(sys.argv) >= 2
-            and ('--help' in sys.argv[1:] or sys.argv[1]
-                 in ('--help-commands', 'egg_info', '--version', 'clean'))):
+    if (len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
+            in ('--help-commands', 'egg_info', '--version', 'clean'))):
 
         try:
             from setuptools import setup
         except ImportError:
             from distutils.core import setup
 
-        metadata['version'] = 0.1
+        metadata['version'] = 0.2
     else:
         from numpy.distutils.core import setup
 
