@@ -13,6 +13,10 @@ facilitate reading and converting data. However, the estimators may be just
 as well applied to data from different modalities, e.g., visual or somatosensory 
 system.
 
+Note that a version of this package with revised structure reflecting the 
+model/method structure from our recent SRF review [12] can be found in the 
+*srf-review* branch. However, it might still need a bit of work to make sure 
+everything is fully functional.
 
 Included models
 ===============
@@ -179,4 +183,7 @@ References
 [10] Lin CJ, Weng RC, and Keerthi SS: Trust Region Newton Method for Logistic Regression J. Mach. Learn. Res., 9, 627-650, 2008.
 
 [11] Hohmann V: Frequency analysis and synthesis using a Gammatone filterbank ACTA ACUSTICA UNITED WITH ACUSTICA, 88, 433-442, 2002.
+
+[12] Meyer AF, Williamson R, Linden JF, and Sahani M. Models of neuronal stimulus-response functions: elaboration, estimation and evaluation. Front. Syst. Neurosci., 2017, 10, 109.
+
 
