@@ -117,8 +117,8 @@ class ARD(LinearModel):
     def fit(self, X, y):
 
         if self.fit_intercept:
-            X, y, X_mean, y_mean, X_std = self._center_data(
-                X, y, self.fit_intercept, self.normalize, copy=True)
+            X, y, X_mean, y_mean = self._center_data(
+                X, y, copy=True)
 
         res = lrard(X, y, threshold=self.threshold, tol=self.tolerance,
                     verbose=self.verbose, maxiter=self.maxiter,
@@ -128,7 +128,7 @@ class ARD(LinearModel):
         if self.fit_intercept:
             if w is not None:
                 self.coef_ = w
-                self._set_intercept(X_mean, y_mean, X_std)
+                self._set_intercept(X_mean, y_mean)
             else:
                 self.coef_ = np.zeros((X.shape[1]))
                 self.intercept_ = 0

@@ -205,6 +205,7 @@ class Ridge(LinearModel):
             X = np.concatenate((column, X), axis=1)
 
         if self.solver == 'iter':
+            # iterative fixed-point method
             res = ridge_evidence_iter(X, y, maxiter=self.maxiter,
                                       tolerance=self.tolerance,
                                       verbose=self.verbose,
@@ -212,14 +213,18 @@ class Ridge(LinearModel):
             mu, SS, alpha, nv = res
             CC = 1./alpha * np.eye(X.shape[1])
             CC[0, 0] = 0
-            print "alpha:", alpha
+
+            if self.verbose > 0:
+                print "alpha:", alpha
 
         elif self.solver == 'optim':
+            # use gradient descent and scipy's optimization routines
             res = ridge_evidence_optim(X, y, init_params=[1., self.alpha0],
                                        verbose=self.verbose)
             mu, SS, nv, CC, alpha = res
 
         elif self.solver == 'map':
+            # Maximum a posteriori estimate using alpha0
             XTX = np.dot(X.T, X)
             XTy = np.dot(X.T, y)
             yTy = np.sum(y * y)

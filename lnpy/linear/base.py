@@ -160,6 +160,26 @@ class LinearModel(SKLinearModel):
 
         return self.__class__.__name__
 
+    def _center_data(self, X, Y, copy=True):
+
+        X_mean = X.mean(axis=0)
+        if copy:
+            X = X - X_mean
+        else:
+            X -= X_mean
+
+        Y_mean = Y.mean(axis=0)
+        if copy:
+            Y = Y - Y_mean
+        else:
+            Y -= Y_mean
+
+        return X, Y, X_mean, Y_mean
+
+    def _set_intercept(self, X_mean, Y_mean):
+
+        self.intercept_ = Y_mean - np.dot(X_mean, self.coef_.T)
+
 
 def create_example_data(shape=(15, 15), N=10000, noise_var=.1):
     """create an example data set using a linear-Gaussian model"""
