@@ -19,7 +19,7 @@ import warnings
 import quantities as pq
 from copy import deepcopy
 
-from .base import Axis, Stimulus
+import base
 
 # Try to use scikits' samplerate method
 use_scikits_resample = False
@@ -257,7 +257,7 @@ class DataConverter(object):
 
             data = stim.base
             fs_stim = stim.sampling_rate.rescale(pq.Hz).item()
-            stim = Stimulus(data, fs_stim)
+            stim = base.Stimulus(data, fs_stim)
 
             if stim.get_samplerate() != transform.get_samplerate():
                 stim.resample(transform.get_samplerate())
@@ -338,9 +338,9 @@ class DataConverter(object):
 
         # Time and center frequency axes
         t = np.linspace(-len_ms, 0, n_temp)
-        axes.append(Axis(values=t * pq.ms, label='Time', unit='ms'))
-        axes.append(Axis(values=f_center * pq.Hz, label='Frequency',
-                         unit='Hz'))
+        axes.append(base.Axis(values=t * pq.ms, label='Time', unit='ms'))
+        axes.append(base.Axis(values=f_center * pq.Hz, label='Frequency',
+                              unit='Hz'))
 
         patch_size = [n_temp, n_fc]
 
@@ -420,7 +420,6 @@ class DataConverter(object):
         stim_ind = np.concatenate(tuple(stim_ind)).astype(np.int)
 
         return time_ind, trial_ind, stim_ind
-
 
 
 class ModelBootstrapper(object):

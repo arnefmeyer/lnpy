@@ -17,9 +17,9 @@ from scipy import signal
 from scipy.interpolate import interp1d
 from scipy.io.wavfile import read as _waveread
 
-from .util import resample as _resample_fun
+import util
 
-from sklearn.base import SKBaseEstimator
+from sklearn.base import BaseEstimator as SKBaseEstimator
 
 
 class BaseEstimator(SKBaseEstimator):
@@ -27,6 +27,10 @@ class BaseEstimator(SKBaseEstimator):
 
     pass
 
+
+# -----------------------------------------------------------------------------
+# basic signal classes
+# -----------------------------------------------------------------------------
 
 class Axis(object):
     """General axis class with values, label, and unit.
@@ -203,7 +207,7 @@ class Stimulus(Signal):
         """Resample simulus"""
 
         if samplerate != self.samplerate:
-            self.data = _resample_fun(self.data, self.samplerate,
+            self.data = util.resample(self.data, self.samplerate,
                                       samplerate, axis=0,
                                       algorithm=algorithm)
             self.samplerate = samplerate
@@ -358,7 +362,7 @@ class Spectrogram(Signal):
                 t0 = 0.
                 t1 = (self.data.shape[0] - 1) / self.samplerate
 
-            self.data = _resample_fun(self.data, self.samplerate,
+            self.data = util.resample(self.data, self.samplerate,
                                       fs, axis=0, algorithm=algorithm)
 
             self.time = np.linspace(t0, t1, self.data.shape[0])

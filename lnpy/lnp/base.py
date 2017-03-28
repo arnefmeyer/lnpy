@@ -11,7 +11,7 @@
 from __future__ import division
 
 import numpy as np
-from .base import BaseEstimator
+from ..base import BaseEstimator
 import abc
 
 
