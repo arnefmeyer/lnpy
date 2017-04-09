@@ -11,12 +11,13 @@
 from __future__ import division
 
 import numpy as np
+from sklearn.metrics import r2_score
 from pylab import mlab
 
 import fast_tools
 
 
-def calc_AUC(Y, score, num=250):
+def AUC(Y, score, num=250):
     """Calculate area under ROC curve"""
 
     if Y.ndim == 1:
@@ -25,7 +26,7 @@ def calc_AUC(Y, score, num=250):
         return fast_tools.calc_auc_trials(Y, score, num)
 
 
-def calc_ROC(proj, spikes, n_steps=250):
+def ROC(proj, spikes, n_steps=250):
     """slow way of computing the ROC curve"""
 
     proj_min = np.amin(proj)
@@ -58,7 +59,7 @@ def calc_ROC(proj, spikes, n_steps=250):
     return fpr, tpr, thresholds, auc
 
 
-def calc_coherence(pred, Y, nfft=256, noverlap=128):
+def coherence(pred, Y, nfft=256, noverlap=128):
     """Coherence between true and predicted response"""
 
     if Y.ndim > 1:
@@ -75,7 +76,7 @@ def calc_coherence(pred, Y, nfft=256, noverlap=128):
     return cxy, f
 
 
-def calc_LogLikelihood(z, Y, dt=1., family='poissonexp'):
+def logLikelihood(z, Y, dt=1., family='poissonexp'):
     """compute negative log likelihood for a given GLM family"""
 
     if family.lower() == 'poissonexp':
@@ -127,7 +128,7 @@ def calc_LogLikelihood(z, Y, dt=1., family='poissonexp'):
     return ll
 
 
-def calc_dPrime(stim, spikes, k, equal_variance=False):
+def dPrime(stim, spikes, k, equal_variance=False):
     """
     Calculate d-prime between spike-conditional and no spike-conditional
     distributions
@@ -160,8 +161,8 @@ def calc_dPrime(stim, spikes, k, equal_variance=False):
     return dprime
 
 
-def calc_MutualInformation(Y, z, n_bins=50, distributions=False,
-                           correct_bias=False):
+def mutualInformation(Y, z, n_bins=50, distributions=False,
+                      correct_bias=False):
     """
     Calculate mutual information transmitted by the RF k
     """
@@ -208,13 +209,13 @@ def calc_MutualInformation(Y, z, n_bins=50, distributions=False,
         return hist_raw, hist_spk, edges_raw
 
 
-def calc_MI(*args, **kwargs):
+def MI(*args, **kwargs):
     """Short-named version of MI calculation routine"""
-    return calc_MutualInformation(*args, **kwargs)
+    return mutualInformation(*args, **kwargs)
 
 
-def calc_KLD(stim_mat, spike_mat, k, num_bins=50, distributions=False,
-             correct_bias=False):
+def KLD(stim_mat, spike_mat, k, num_bins=50, distributions=False,
+        correct_bias=False):
     """Calculate KLD between conditional distributions of projections"""
 
     # Histogram of stimulus projections (all stimulus examples)

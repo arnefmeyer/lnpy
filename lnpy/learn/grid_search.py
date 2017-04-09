@@ -17,7 +17,7 @@ from sklearn.cross_validation import StratifiedKFold, KFold
 from sklearn.metrics import make_scorer, r2_score, roc_auc_score
 from sklearn.base import clone as _clone_estimator
 
-from ..lnp.util import calcMI, calcCoherence, calcLogLikelihood
+from ..metrics import MI, coherence, logLikelihood
 
 
 def _calc_AUC(Y, z):
@@ -36,7 +36,7 @@ def _calc_AUC(Y, z):
 
 def _calc_MI(Y, z):
 
-    mi = calcMI(Y, z, n_bins=50, distributions=False, correct_bias=True)
+    mi = MI(Y, z, n_bins=50, distributions=False, correct_bias=True)
     return np.mean(mi)
 
 
@@ -44,21 +44,21 @@ def _calc_Coherence(Y, z):
 
     z[z < 0] = 0.
 
-    cxy, f = calcCoherence(z, Y)
+    cxy, f = coherence(z, Y)
 
     return np.mean(cxy)
 
 
 def _calc_PoissonLL(Y, z):
 
-    ll = calcLogLikelihood(z, Y, dt=1., family='poissonexp')
+    ll = logLikelihood(z, Y, dt=1., family='poissonexp')
 
     return ll
 
 
 def _calc_ModPoissonLL(Y, z):
 
-    ll = calcLogLikelihood(z, Y, dt=1., family='poissonexpquad')
+    ll = logLikelihood(z, Y, dt=1., family='poissonexpquad')
 
     return ll
 
@@ -69,11 +69,11 @@ def _calc_BernoulliLL(Y, z):
     pred = z[valid[0]]
 
     if len(valid) == 2:
-        ll = calcLogLikelihood(pred, Y[valid[0], valid[1]], dt=1.,
-                               family='binomlogit')
+        ll = logLikelihood(pred, Y[valid[0], valid[1]], dt=1.,
+                           family='binomlogit')
     else:
-        ll = calcLogLikelihood(pred, Y[valid[0]], dt=1.,
-                               family='binomlogit')
+        ll = logLikelihood(pred, Y[valid[0]], dt=1.,
+                           family='binomlogit')
 
     return ll
 
