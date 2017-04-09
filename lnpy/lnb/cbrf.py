@@ -33,14 +33,14 @@ import numpy as np
 import time
 import warnings
 
-from base import LNPEstimator
+from base import LNBEstimator
 from ..learn.svm import SVM
 from ..learn.sgd import SGD, ASGD
 from ..learn import GaussianPrior, SquaredHingeLoss
 from ..learn.grid_search import ParamSearchCV
 
 
-class CbRF(LNPEstimator):
+class CbRF(LNBEstimator):
     """Classification-based RF estimation class
 
     Computes full solution of the CbRF method by using batch gradient
@@ -140,7 +140,7 @@ class CbRF(LNPEstimator):
         self.intercept_ = np.copy(model.intercept_)
 
 
-class StochasticCbRF(LNPEstimator):
+class StochasticCbRF(LNBEstimator):
     """Stochastic gradient descent version of the CbRF method
 
     Approximates the solution to the CbRF method by stochastic gradient
@@ -278,16 +278,6 @@ class StochasticCbRF(LNPEstimator):
 
         if self.optimize:
 
-            # Grid search parameters
-#            lower = 2. ** -30
-#            upper = 2. ** 2
-#            if self.param_range is not None:
-#                lower = self.param_range[0]
-#                upper = self.param_range[1]
-#
-#            alpha_values = np.power(2., np.linspace(np.log2(lower),
-#                                                    np.log2(upper), 7))
-
             grid_params = self.grid_params
             if 'param_grid' not in grid_params.keys() or \
                     grid_params['param_grid'] is None:
@@ -321,4 +311,3 @@ class StochasticCbRF(LNPEstimator):
 
         self.coef_ = np.copy(model.coef_)
         self.intercept_ = np.copy(model.intercept_)
-
