@@ -5,7 +5,7 @@
 # License: GPLv3
 
 from base import BaseTransform
-from ..lnp.util import segment
+from ..util import segment
 from ..base import Stimulus, Spectrogram, ModulationSpectrogram
 import quantities as pq
 import numpy as np
