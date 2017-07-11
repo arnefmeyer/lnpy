@@ -13,8 +13,11 @@ from __future__ import division
 import numpy as np
 from sklearn.metrics import r2_score
 from pylab import mlab
+import matplotlib.pyplot as plt
+from scipy import stats
 
 import fast_tools
+from .plotting import set_font_axes
 
 
 def AUC(Y, score, num=250):
@@ -293,3 +296,113 @@ def vdot_normal(x, y):
 
     else:
         return 0.
+
+
+def srfpower(yy, indep_noise=False, verbose=False):
+    """Estimate signal and noise power as described in Sahani & Linden 2003b"""
+
+    TT, NN = yy.shape
+
+    ybar = np.mean(yy, axis=1)
+    yvar = np.var(yy, axis=1, ddof=1)
+    ybarm = np.mean(ybar)
+    yvarm = np.mean(yvar)
+
+    Pyy = np.mean(np.var(yy, axis=0, ddof=1))  # = Psignal + Pnoise
+    Pybar = np.var(ybar, ddof=1)  # = Psignal + Pnoise/N
+
+    Psignal = (NN*Pybar - Pyy) / (NN - 1.)
+    Pnoise = Pyy - Psignal
+
+    if indep_noise:
+        Esignal = 1./TT * np.sqrt(
+            4./NN * (np.dot(yvar.T, ybar**2) -
+            2 * ybarm * (np.sum(yvar*ybar)) + TT * yvarm*ybarm**2) +
+            2./NN/(NN-1.)*((1. - 2./TT) * np.sum(yvar*yvar) + yvarm ** 2)
+            )
+    else:
+        ydelt = (yy.T - ybar).T  # repmat(ybar,1,size(yy,2));
+        ycovm = np.dot(ydelt, np.mean(ydelt, axis=0).T) / (NN - 1.)
+        ycovmm = np.mean(ycovm)
+        e1 = 4. / NN * (np.var(np.dot(ybar.T, ydelt), ddof=1) / TT **2 -
+                2 * ybarm * (np.dot(ycovm.T, ybar)) / TT + ybarm ** 2 * ycovmm)
+        e2 = 2./NN/(NN-1.)*(np.sum(np.dot(ydelt.T, ydelt)**2)/(NN - 1.)**2/TT**2 -
+                2 * np.dot(ycovm.T, ycovm) / TT + ycovmm**2)
+        Esignal = np.sqrt(e1 + e2)
+
+    if verbose:
+        print "signal power = %g +/- %g" % (Psignal, Esignal)
+        print "noise power = %g" % Pnoise
+        print "s/n power ratio = %g +/- %g" % (Psignal/Pnoise, Esignal/Pnoise)
+
+    return Psignal, Pnoise, Esignal
+
+
+def plot_srfpower(Psignal, Pnoise, Esignal=None, ax=None, ls_line=True,
+                  color=3*[.5], **kwargs):
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+    ax.errorbar(Pnoise, Psignal, yerr=Esignal, fmt='o', color=color,
+                **kwargs)
+    ax.set_xlabel(r'Noise power (spikes$^2$/bin)')
+    ax.set_ylabel(r'Signal power (spikes$^2$/bin)')
+
+    # Diagonal line
+    vmin = min(np.min(Pnoise), np.min(Psignal))
+    vmax = min(np.max(Pnoise), np.max(Psignal))
+    xx = np.linspace(vmin, vmax, 100)
+    ax.plot(xx, xx, '--', linewidth=1, color=3*[.25], zorder=0)
+
+    if ls_line:
+        slope, intercept, r_value, _, _ = stats.linregress(Pnoise, Psignal)
+        vmin = min(np.min(Pnoise), np.min(Psignal))
+        vmax = 1.1 * max(np.max(Pnoise), np.max(Psignal))
+        xx = np.linspace(vmin, vmax, 100)
+        ax.plot(xx, slope * xx + intercept, '-', linewidth=1, color=3*[0])
+
+    set_font_axes(ax, add_size=0, size_ticks=6, size_labels=8,
+                  size_text=8, size_title=8, family='Arial')
+
+    return ax.get_figure()
+
+
+def plot_normalized_pred_power(Psignal, Pnoise, pp_cv, pp_insample=None,
+                               ax=None, lsline=True, legend=True,
+                               label_cv='cv', label_insample='insample',
+                               **kwargs):
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+    xx = Pnoise / Psignal
+    if pp_insample is not None:
+        ax.errorbar(xx, pp_insample, fmt='o', color=3*[.95],
+                    label=label_insample, **kwargs)
+    ax.errorbar(xx, pp_cv, fmt='o', color=3*[.4], label=label_cv, **kwargs)
+    ax.set_xlabel(r'Normalized noise power')
+    ax.set_ylabel(r'Normalized linearly predictable power')
+
+    if lsline:
+        vmin = min(np.min(xx), 0)
+        vmax = 1.05 * np.max(xx)
+        vv = np.linspace(vmin, vmax, 100)
+
+        if pp_insample is not None:
+            slope, intercept, r_value, _, _ = stats.linregress(xx, pp_insample)
+            ax.plot(vv, slope * vv + intercept, '-', linewidth=1.5,
+                    color=3*[.8])
+
+        slope, intercept, r_value, _, _ = stats.linregress(xx, pp_cv)
+        ax.plot(vv, slope * vv + intercept, '-', linewidth=1.5, color=3*[0])
+
+    if legend:
+        ax.legend(loc='best', numpoints=1, fontsize=8)
+
+    set_font_axes(ax, add_size=0, size_ticks=6, size_labels=8,
+                  size_text=8, size_title=8, family='Arial')
+
+    return ax.get_figure()

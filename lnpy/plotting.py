@@ -48,8 +48,8 @@ def get_nice_color(name=None, normalize=True):
         return cdict
 
 
-def set_parameters_axes(ax, add_size=0, size_ticks=6, size_labels=8,
-                        size_text=8, size_title=8):
+def set_font_axes(ax, add_size=0, size_ticks=6, size_labels=8,
+                  size_text=8, size_title=8):
     """helper to set parameters of matplotlib axes"""
 
     ax.title.set_fontsize(size_title + add_size)
@@ -61,6 +61,9 @@ def set_parameters_axes(ax, add_size=0, size_ticks=6, size_labels=8,
     for at in ax.texts:
         at.set_fontsize(size_text + add_size)
         at.set_fontname('Arial')
+
+
+set_parameters_axes = set_font_axes  # for backward compatibility
 
 
 def plot_scatter(ax, x, y, xerr, yerr, xlabel='', ylabel='',
