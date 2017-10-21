@@ -9,7 +9,7 @@
 """
 
 import numpy as np
-from sklearn.utils import extmath
+from scipy.linalg import pinvh
 import time
 
 from .base import LinearModel
@@ -41,7 +41,7 @@ def lrard(xx, yy, threshold=1e7, tol=1e-3, maxiter=1500, verbose=True,
             break
 
         # variance of posterior over w
-        SS = extmath.pinvh(xx2 / nv + np.diag(aa))
+        SS = pinvh(xx2 / nv + np.diag(aa))
 
         if np.isnan(1. / np.linalg.cond(SS)):
             raise RuntimeError('Rcond NaN - have to revert to ASD')
@@ -81,7 +81,7 @@ def lrard(xx, yy, threshold=1e7, tol=1e-3, maxiter=1500, verbose=True,
                 (niter, DD, DDo, nv, t_elapsed)
 
     if len(aa) > 0:
-        Sw = extmath.pinvh(xx2 / nv + np.diag(aa))
+        Sw = pinvh(xx2 / nv + np.diag(aa))
 
         ww_out = np.zeros((DDo,))
         ww_out[rv] = np.dot(Sw, xxyy) / nv
