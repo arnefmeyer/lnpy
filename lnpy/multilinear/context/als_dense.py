@@ -20,21 +20,46 @@ from ...linear import ASD
 import context_fast as ctxtools
 
 
-def fit_context_model(S, y, J, K, M, N, reg_iter=3, max_iter=100,
+from ipdb import set_trace as db
+
+
+def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
                       c2=1., tol=1e-5, wrap_around=True, solver='iter',
                       smooth_min=1e-3, init_params_cgf=[6., 2., 2.],
                       init_params_prf=[7, 4, 4]):
 
-    # Pad zeros around stimulus to simplify subsequent computations
-    S_pad = pad_stimulus(S, J, K, M, N, wrap_around=wrap_around)
+    assert isinstance(S, (np.ndarray, list)), \
+        "stimulus S must be numpy array or list or numpy arrays"
+    assert isinstance(Y, (np.ndarray, list)), \
+        "response y must be numpy array or list or numpy arrays"
+
+    assert type(S) == type(Y), "S and y must be of the same type"
+
+    if isinstance(S, np.ndarray):
+        # for now let's put everything in lists to make things easier
+        S = [S]
+        Y = [Y]
+
+    S_pad = []
+    for s in S:
+        # Pad zeros around stimulus to simplify subsequent computations
+        s_pad = pad_stimulus(s, J, K, M, N, wrap_around=wrap_around)
+        S_pad.append(s_pad)
 
     # Initialize context parameters using STRF estimate
     model_strf = ASD(D=(J, K), fit_intercept=True, verbose=True, maxiter=100,
                      stepsize=0.01, solver=solver, init_params=init_params_prf,
                      smooth_min=smooth_min, tolerance=0.1)
 
-    SS = segment_spectrogram(S, J, order='C', prepend_zeros=False)
-    model_strf.fit(SS, y[J-1:])
+    SS = []
+    YY = []
+    for s, y in zip(S, Y):
+        SS.append(segment_spectrogram(s, J, order='C', prepend_zeros=False))
+        YY.append(y[J-1:])
+
+    SS = np.concatenate(SS)
+    YY = np.concatenate(YY)
+    model_strf.fit(SS, YY)
 
     init_params_prf = np.append(model_strf.scale_param,
                                 model_strf.smooth_params)
@@ -70,16 +95,31 @@ def fit_context_model(S, y, J, K, M, N, reg_iter=3, max_iter=100,
             print "  step %d/%d" % (j+1, len(models))
             sys.stdout.flush()
 
-            if j == 0:
-                X, y_hat = compute_A_matrix(S_pad, y, models[1], J, K, M, N,
-                                            c2)
-            else:
-                X, y_hat = compute_B_matrix(S_pad, y, models[0], J, K, M, N)
+            XX = []
+            Y_hat = []
+            for s, y in zip(S_pad, Y):
 
-            run_als_update(X, y_hat, model, regularize=i < reg_iter)
+                if j == 0:
+                    X, y_hat = compute_A_matrix(s, y, models[1], J, K, M, N,
+                                                c2)
+                else:
+                    X, y_hat = compute_B_matrix(s, y, models[0], J, K, M, N)
 
-        y_pred = predict_response_context(S_pad, model_prf, model_cgf,
-                                          T, J, K, M, N, c2, pad_zeros=False)
+                XX.append(X)
+                Y_hat.append(y_hat)
+
+            XX = np.concatenate(XX)
+            Y_hat = np.concatenate(Y_hat)
+            run_als_update(XX, Y_hat, model, regularize=i < reg_iter)
+
+        Y_pred = []
+        for s in S_pad:
+            y_pred = predict_response_context(s, model_prf, model_cgf,
+                                              T, J, K, M, N, c2,
+                                              pad_zeros=False)
+            Y_pred.append(y_pred)
+
+        Y_pred = np.concatenate(Y_pred)
 
         mse = np.mean((y - y_pred)**2)
         print "  mean squared error: %g" % mse

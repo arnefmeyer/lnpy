@@ -75,6 +75,9 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
     w_prf = w_prf[::-1, :]
     w_cgf = w_cgf[::-1, :]
 
+    if frequencies is None:
+        frequencies = 2.**np.arange(w_prf.shape[1])
+
     # frequency axis
     fc = frequencies
     df_log = np.diff(np.log2(fc))
@@ -340,27 +343,40 @@ class ContextModel(BaseEstimator, RegressorMixin):
     def _fit_dense(self, X, y):
 
         J = self.J
-        K = X.shape[1]
         M = self.M
         N = self.N
+
+        if isinstance(X, np.ndarray):
+            K = X.shape[1]
+        else:
+            K = X[0].shape[1]
 
         max_iter = self.max_iter
         reg_iter = self.reg_iter
 
         if self.algorithm.lower() == 'als_dense':
-            models = _fit_context_als(X, y, J, K, M, N, reg_iter=reg_iter,
-                                      max_iter=max_iter, c2=1.,
+            models = _fit_context_als(X, y, J, K, M, N,
+                                      reg_iter=reg_iter,
+                                      max_iter=max_iter,
+                                      c2=1.,
                                       tol=self.tolerance,
-                                      wrap_around=True, solver=self.als_solver,
+                                      wrap_around=True,
+                                      solver=self.als_solver,
                                       init_params_cgf=self.init_params_cgf,
                                       smooth_min=self.smooth_min,
                                       init_params_prf=self.init_params_prf)
 
         elif self.algorithm.lower() == 'vb_dense':
-            models = _fit_context_vb(X, y, J, K, M, N, reg_iter=reg_iter,
-                                     max_iter=max_iter, c2=1.,
+
+            raise NotImplementedError()
+
+            models = _fit_context_vb(X, y, J, K, M, N,
+                                     reg_iter=reg_iter,
+                                     max_iter=max_iter,
+                                     c2=1.,
                                      tol=self.tolerance,
-                                     wrap_around=True, solver=self.als_solver,
+                                     wrap_around=True,
+                                     solver=self.als_solver,
                                      init_params_cgf=self.init_params_cgf,
                                      smooth_min=self.smooth_min)
 
