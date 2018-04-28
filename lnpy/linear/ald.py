@@ -11,7 +11,7 @@
 import numpy as np
 from os.path import split, join
 
-from ..base import LinearModel
+from .base import LinearModel
 
 
 class ALD(LinearModel):
