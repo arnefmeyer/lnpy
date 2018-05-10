@@ -8,6 +8,8 @@
     Automatic relevance determination (discussed in Sahani & Linden NIPS 2003a)
 """
 
+from __future__ import print_function
+
 import numpy as np
 from scipy.linalg import pinvh
 import time
@@ -77,8 +79,8 @@ def lrard(xx, yy, threshold=1e7, tol=1e-3, maxiter=1500, verbose=True,
 
         if verbose:
             t_elapsed = time.time() - t0
-            print "iter %d: %d/%d active | nv=%0.4f | %0.2f s" %\
-                (niter, DD, DDo, nv, t_elapsed)
+            print("iter %d: %d/%d active | nv=%0.4f | %0.2f s" %\
+                (niter, DD, DDo, nv, t_elapsed))
 
     if len(aa) > 0:
         Sw = pinvh(xx2 / nv + np.diag(aa))

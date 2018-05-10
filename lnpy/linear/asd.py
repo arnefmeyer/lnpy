@@ -9,6 +9,8 @@
     this code is based on Maneesh's matlab implementation.
 """
 
+from __future__ import print_function
+
 import numpy as np
 from scipy import linalg, optimize
 from sklearn.utils import extmath
@@ -67,8 +69,8 @@ def lrasd(X, y, D, init_params=[.1, .1, .1], maxiter=100, step_size=0.01,
             nv = 1e-12
 
         if verbose:
-            print "%d: r=%.4g | s=(%.4g, %.4g) | nv=%0.4f" %\
-                (i+1, rr, ss[0], ss[1], nv)
+            print("%d: r=%.4g | s=(%.4g, %.4g) | nv=%0.4f" %\
+                (i+1, rr, ss[0], ss[1], nv))
             sys.stdout.flush()
 
         # Compute covariance matrix; Numpy's nice broadcasting rules make
@@ -181,8 +183,8 @@ def _asd_fun_grad(theta, X, y, D, verbose, other):
     dEE = np.array([dNsevar.item(), dr, dSmooth[0], dSmooth[1]])
 
     if verbose:
-        print "-logE: %0.3f | nv: %0.3f | r: %0.3f | s: (%0.3f, %0.3f)" %\
-            (-logE, nv, rr, ss[0], ss[1])
+        print("-logE: %0.3f | nv: %0.3f | r: %0.3f | s: (%0.3f, %0.3f)" %\
+            (-logE, nv, rr, ss[0], ss[1]))
         sys.stdout.flush()
 
     return -logE, -dEE
@@ -232,8 +234,8 @@ def calc_ASD_optim(X, y, D, init_params=None, verbose=False,
     ss = opt_params[2:]
 
     if verbose:
-        print "nv: %0.3f | r: %0.3f | sx: %0.3f | sy: %0.3f" %\
-            (nv, rr, ss[0], ss[1])
+        print("nv: %0.3f | r: %0.3f | sx: %0.3f | sy: %0.3f" %\
+            (nv, rr, ss[0], ss[1]))
 
     # Prior covariance matrix for current parameter setting
     wsize = D.shape[:2]

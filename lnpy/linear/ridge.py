@@ -8,6 +8,8 @@
     Ridge regression (via an iterative fixed-point algorithm)
 """
 
+from __future__ import print_function
+
 import numpy as np
 from scipy import linalg, optimize
 from sklearn.utils import extmath
@@ -72,12 +74,12 @@ def ridge_evidence_iter(X, y, penalize_bias=False, maxvalue=1e6, maxiter=1e3,
         niter += 1
 
         if verbose > 1:
-            print "%d | alpha=%0.3f | noisevar=%0.3f | %g | %0.2f s" %\
-                (niter, alpha, noisevar, dd, time.time() - t0)
+            print("%d | alpha=%0.3f | noisevar=%0.3f | %g | %0.2f s" %\
+                (niter, alpha, noisevar, dd, time.time() - t0))
 
     if verbose > 0:
         t_fit = time.time() - t0
-        print "Ridge: finished after %d iterations (%0.2f s)" % (niter, t_fit)
+        print("Ridge: finished after %d iterations (%0.2f s)" % (niter, t_fit))
 
     return mu, S, alpha, noisevar
 
@@ -121,7 +123,7 @@ def _ridge_evidence_fun_grad(theta, X, y, verbose, other):
     dEE = np.array([dNsevar.item(), dAlpha])
 
     if verbose:
-        print "-logE: %0.3f | nv: %0.3f | alpha: %0.3f" % (-logE, nv, alpha)
+        print("-logE: %0.3f | nv: %0.3f | alpha: %0.3f" % (-logE, nv, alpha))
 
     return -logE, -dEE
 
@@ -152,7 +154,7 @@ def ridge_evidence_optim(X, y, init_params=None, verbose=False):
     args = (X, y, verbose, other)
     bounds = [(1e-6, 1e6), (1e-6, 1e6)]
 
-    print "x0:", x0
+    print("x0:", x0)
     res = optimize.fmin_tnc(fun, x0, fprime=fprime, args=args,
                             approx_grad=0, bounds=bounds, epsilon=1e-08)
 
@@ -161,7 +163,7 @@ def ridge_evidence_optim(X, y, init_params=None, verbose=False):
     alpha = opt_params[1]
 
     if verbose:
-        print "nv: %0.3f | alpha: %0.3f" % (nv, alpha)
+        print("nv: %0.3f | alpha: %0.3f" % (nv, alpha))
 
     # Compute final quantities
     Cprior = 1./alpha * I
@@ -215,7 +217,7 @@ class Ridge(LinearModel):
             CC[0, 0] = 0
 
             if self.verbose > 0:
-                print "alpha:", alpha
+                print("alpha:", alpha)
 
         elif self.solver == 'optim':
             # use gradient descent and scipy's optimization routines
@@ -322,10 +324,10 @@ def _ridge_smooth_fun_grad(theta, X, y, D, verbose, other):
     dEE = np.append(dNsevar.item(), dAlphas)
 
     if verbose:
-        ss = "-logE: %0.3f | nv: %0.3f | alphas: (" % (-logE, nv)
+        ss =("-logE: %0.3f | nv: %0.3f | alphas: (" % (-logE, nv))
         for alpha in alphas:
             ss += ("%0.3g, " % alpha)
-        print ss[:-2] + ")"
+        print(s[:-2] + ")")
 
     return -logE, -dEE
 
@@ -375,7 +377,7 @@ def ridge_smooth(X, y, D, init_params=None, verbose=False, fit_intercept=True,
         ss = "  nv: %0.3f | alphas: (" % nv
         for alpha in alphas:
             ss += ("%0.3f, " % alpha)
-        print ss[:-1] + ")"
+        print(ss[:-1] + ")")
 
     # Prior covariance matrix for current parameter setting
     Cprior, invC = _ridge_smooth_inverse(D, alphas, fit_intercept=True)
@@ -471,3 +473,4 @@ class SmoothRidge(LinearModel):
             z += self.intercept_
 
         return z
+
