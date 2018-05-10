@@ -4,6 +4,8 @@
 # Author: Arne F. Meyer <arne.f.meyer@gmail.com>
 # License: GPLv3
 
+from __future__ import print_function
+
 import os
 from os.path import join, exists
 
@@ -31,25 +33,25 @@ def configuration(parent_package='', top_path=None):
             lines = f.read()
 
         if '#include <stdlib.h>' not in lines:
-            print 50 * '-'
-            print "Adding #include <stdlib.h> to file"
-            print c_file
+            print( 50 * '-')
+            print("Adding #include <stdlib.h> to file")
+            print(c_file)
             with file(c_file, 'w') as f:
                 f.write("#include <stdlib.h>\n" + lines)
-            print 50 * '-'
+            print(50 * '-')
 
         # Further, we have to rename gfb_analyze in the header file
         with file(h_file, 'r') as f:
             lines = f.read()
 
         if 'void gfb_analyze(' in lines:
-            print 50 * '-'
-            print "Renaming function 'gfb_analyze' to 'analyze' in"
-            print h_file
+            print(50 * '-')
+            print("Renaming function 'gfb_analyze' to 'analyze' in")
+            print(h_file)
             lines = lines.replace('void gfb_analyze(', 'void analyze(')
             with file(h_file, 'w') as f:
                 f.write(lines)
-            print 50 * '-'
+            print(50 * '-')
 
         sources = ['wrap_gtfb.c',
                    join('src', 'gammatone', 'Gfb_analyze.c')]
@@ -74,7 +76,7 @@ and extract the files Gfb_analyze.c and Gfb_analyze.h into the directory
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 """
 
-        print descr
+        print(descr)
 
     return config
 
