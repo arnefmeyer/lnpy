@@ -8,7 +8,7 @@
     Some (hopefully) useful utilities
 """
 
-from __future__ import division
+from __future__ import print_function, division
 
 import os
 import os.path as op
@@ -19,7 +19,8 @@ import warnings
 import quantities as pq
 from copy import deepcopy
 
-import base
+from .base import Stimulus, Axis
+
 
 # Try to use scikits' samplerate method
 use_scikits_resample = False
@@ -27,7 +28,7 @@ try:
     import scikits.samplerate as sks
     use_scikits_resample = True
     max_ratio = 256.
-except:
+except ImportError:
     pass
 
 
@@ -37,14 +38,14 @@ def makedirs_save(f):
     if not os.path.exists(f):
         try:
             os.makedirs(f)
-        except:
+        except BaseException:
             pass
 
 
 def update_progress(progress):
     """A simple console-based progress bar"""
-    print "\r[{0:50s}] {1:.1f}%".format('#' * int(progress * 50),
-                                        progress * 100),
+    print("\r[{0:50s}] {1:.1f}%".format('#' * int(progress * 50),
+                                        progress * 100), end=" ")
 
 
 def resample(x, fs_old, fs_new, axis=0, algorithm='scipy'):
@@ -257,7 +258,7 @@ class DataConverter(object):
 
             data = stim.base
             fs_stim = stim.sampling_rate.rescale(pq.Hz).item()
-            stim = base.Stimulus(data, fs_stim)
+            stim = Stimulus(data, fs_stim)
 
             if stim.get_samplerate() != transform.get_samplerate():
                 stim.resample(transform.get_samplerate())
@@ -310,10 +311,10 @@ class DataConverter(object):
             sample_cnt += X.shape[0]
 
             if self.verbose:
-                print "  Stimulus matrix: %d temp. steps x %d features" % \
-                    (sample_cnt, X.shape[1])
-                print "  Spike    matrix: %d temp. steps x %d trials" % \
-                    (sample_cnt, Y.shape[1])
+                print("  Stimulus matrix: %d temp. steps x %d features" %
+                      (sample_cnt, X.shape[1]))
+                print("  Spike    matrix: %d temp. steps x %d trials" %
+                      (sample_cnt, Y.shape[1]))
 
             if max_samples >= 1 and sample_cnt >= max_samples:
                 break
@@ -338,9 +339,9 @@ class DataConverter(object):
 
         # Time and center frequency axes
         t = np.linspace(-len_ms, 0, n_temp)
-        axes.append(base.Axis(values=t * pq.ms, label='Time', unit='ms'))
-        axes.append(base.Axis(values=f_center * pq.Hz, label='Frequency',
-                              unit='Hz'))
+        axes.append(Axis(values=t * pq.ms, label='Time', unit='ms'))
+        axes.append(Axis(values=f_center * pq.Hz, label='Frequency',
+                         unit='Hz'))
 
         patch_size = [n_temp, n_fc]
 
@@ -491,7 +492,8 @@ class ModelBootstrapper(object):
         rng = np.random.RandomState(self.random_seed)
 
         if self.verbose:
-            print "----------------- Bootstrapping model -----------------",
+            print("----------------- Bootstrapping model -----------------",
+                  end=" ")
 
         W = np.zeros((n_runs, n_features))
         for i in range(n_runs):

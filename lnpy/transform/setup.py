@@ -29,19 +29,19 @@ def configuration(parent_package='', top_path=None):
             libraries.append('m')
 
         # We have to include stdlib.h; otherwise, it might not compile
-        with file(c_file, 'r') as f:
+        with open(c_file, 'r') as f:
             lines = f.read()
 
         if '#include <stdlib.h>' not in lines:
-            print( 50 * '-')
+            print(50 * '-')
             print("Adding #include <stdlib.h> to file")
             print(c_file)
-            with file(c_file, 'w') as f:
+            with open(c_file, 'w') as f:
                 f.write("#include <stdlib.h>\n" + lines)
             print(50 * '-')
 
         # Further, we have to rename gfb_analyze in the header file
-        with file(h_file, 'r') as f:
+        with open(h_file, 'r') as f:
             lines = f.read()
 
         if 'void gfb_analyze(' in lines:
@@ -49,7 +49,7 @@ def configuration(parent_package='', top_path=None):
             print("Renaming function 'gfb_analyze' to 'analyze' in")
             print(h_file)
             lines = lines.replace('void gfb_analyze(', 'void analyze(')
-            with file(h_file, 'w') as f:
+            with open(h_file, 'w') as f:
                 f.write(lines)
             print(50 * '-')
 
@@ -79,6 +79,7 @@ and extract the files Gfb_analyze.c and Gfb_analyze.h into the directory
         print(descr)
 
     return config
+
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
