@@ -63,7 +63,7 @@ def configuration(parent_package='', top_path=None):
 
     else:
         descr = """!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-Couldn't find gammatone filterbank code. If you wan't to
+Couldn't find gammatone filterbank code. If you want to
 compile the package with the gammatone filterbank please download the
 code from
 

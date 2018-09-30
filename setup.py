@@ -35,6 +35,7 @@ class CleanCommand(_clean):
                 if dirname == '__pycache__':
                     shutil.rmtree(os.path.join(dirpath, dirname))
 
+
 cmdclass = {'clean': CleanCommand}
 
 
