@@ -381,7 +381,7 @@ class ASD(LinearModel):
             ss = self.smooth_params
 
             if nv is None:
-                nv = np.mean((y - X .dot(np.linalg.lstsq(X, y)[0])) ** 2)
+                nv = np.mean((y - X.dot(np.linalg.lstsq(X, y)[0])) ** 2)
             if rr is None:
                 rr = init_params[0]
             if ss is None:
