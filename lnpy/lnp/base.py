@@ -5,20 +5,18 @@
 # License: GPLv3
 
 """
-    A base class for all receptive field estimation methods
+    Base class for linear-nonlinear Poisson (LNP) model estimation methods
 """
 
 from __future__ import division
 
 import numpy as np
-from sklearn.base import BaseEstimator as SKBaseEstimator
+from ..base import BaseEstimator
 import abc
 
-from ..base import Spectrogram
 
-
-class LNPEstimator(SKBaseEstimator):
-    """Base class for receptive field estimation methods
+class LNPEstimator(BaseEstimator):
+    """Base class for LNP estimators
 
     Parameters
     ----------
@@ -102,28 +100,3 @@ class LNPEstimator(SKBaseEstimator):
         else:
             self.coef_ = w
             self.spikefilt_ = None
-
-
-class STRF(Spectrogram):
-    """Convenience class to wrap Specrogram as STRF"""
-
-    def __init__(self, *args, **kwargs):
-        super(STRF, self).__init__(*args, **kwargs)
-
-    def show(self, **kwargs):
-        vmax = np.max(np.abs(self.data))
-        return super(STRF, self).show(vmax=vmax, vmin=-vmax, **kwargs)
-
-    @property
-    def intercept(self):
-        if 'intercept' in self.annotations:
-            return self.annotations['intercept']
-        else:
-            return 0.
-
-    @intercept.setter
-    def intercept(self, x):
-        if 'intercept' in self.annotations:
-            self.annotations['intercept'] = x
-        else:
-            self.annotations.update(dict(intercept=x))

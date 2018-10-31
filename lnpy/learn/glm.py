@@ -287,7 +287,6 @@ class BernoulliGLM(LinearBaseEstimator):
 
     def _fit(self, X, y, is_sparse=True):
 
-
         X = np.require(X, dtype=np.float64, requirements=['C', 'A'])
         y = np.require(y, dtype=np.float64, requirements=['C', 'A'])
 

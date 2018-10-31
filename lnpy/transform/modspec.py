@@ -7,7 +7,7 @@
 from __future__ import division
 
 import numpy as np
-from base import BaseTransform
+from .base import BaseTransform
 from gammatone import GammatoneFilterbank
 from spectrogram import STFT
 from ..base import ModulationSpectrogram

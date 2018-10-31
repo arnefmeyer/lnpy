@@ -5,7 +5,7 @@
 # License: GPLv3
 
 """
-    Data base classes
+    Estimator and data base classes
 """
 
 from __future__ import division
@@ -17,8 +17,20 @@ from scipy import signal
 from scipy.interpolate import interp1d
 from scipy.io.wavfile import read as _waveread
 
-from .util import resample as _resample_fun
+import util
 
+from sklearn.base import BaseEstimator as SKBaseEstimator
+
+
+class BaseEstimator(SKBaseEstimator):
+    """For convenience we derive all estimators from sklearn's base class"""
+
+    pass
+
+
+# -----------------------------------------------------------------------------
+# basic signal classes
+# -----------------------------------------------------------------------------
 
 class Axis(object):
     """General axis class with values, label, and unit.
@@ -195,7 +207,7 @@ class Stimulus(Signal):
         """Resample simulus"""
 
         if samplerate != self.samplerate:
-            self.data = _resample_fun(self.data, self.samplerate,
+            self.data = util.resample(self.data, self.samplerate,
                                       samplerate, axis=0,
                                       algorithm=algorithm)
             self.samplerate = samplerate
@@ -350,7 +362,7 @@ class Spectrogram(Signal):
                 t0 = 0.
                 t1 = (self.data.shape[0] - 1) / self.samplerate
 
-            self.data = _resample_fun(self.data, self.samplerate,
+            self.data = util.resample(self.data, self.samplerate,
                                       fs, axis=0, algorithm=algorithm)
 
             self.time = np.linspace(t0, t1, self.data.shape[0])
@@ -905,3 +917,28 @@ def _segment(data, seg_len, shift):
         N = tmp.shape[0]
         out[seg, :N] = tmp
     return out
+
+
+class STRF(Spectrogram):
+    """Convenience class to wrap a Spectrogram as spectro-temporal RF"""
+
+    def __init__(self, *args, **kwargs):
+        super(STRF, self).__init__(*args, **kwargs)
+
+    def show(self, **kwargs):
+        vmax = np.max(np.abs(self.data))
+        return super(STRF, self).show(vmax=vmax, vmin=-vmax, **kwargs)
+
+    @property
+    def intercept(self):
+        if 'intercept' in self.annotations:
+            return self.annotations['intercept']
+        else:
+            return 0.
+
+    @intercept.setter
+    def intercept(self, x):
+        if 'intercept' in self.annotations:
+            self.annotations['intercept'] = x
+        else:
+            self.annotations.update(dict(intercept=x))

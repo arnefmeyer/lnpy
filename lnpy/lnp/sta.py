@@ -5,7 +5,7 @@
 # License: GPLv3
 
 """
-    Spike-triggered average (STA) stimulus
+    Plain spike-triggered average (STA) estimator
 """
 
 from base import LNPEstimator

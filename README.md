@@ -1,35 +1,36 @@
-.. -*- mode: rst -*-
-
 lnpy
 ====
 
-lnpy is a Python module for fitting sensory neuron's receptive field parameters 
-using a linear-nonlinear model. This module is build on top of several excellent 
-Python modules, e.g., SciPy, NumPy, matplotlib, scikits-learn, statsmodels, and 
-neo. The critical parts are written in C(++) and wrapped using Cython.
+lnpy is a Python module for fitting parameters of neuronal stimulus-response 
+functions (SRFs; for a review see [1]). While initially developed to estimate 
+sensory neuron's receptive field parameters using a linear-nonlinear (LN)
+model there are a number of methods to fit other models, e.g., linear and 
+multilinear models.
+
+This module is build on top of several excellent Python modules, e.g., 
+SciPy, NumPy, matplotlib, scikits-learn, statsmodels, and neo. The critical 
+parts are written in C(++) and wrapped using Cython.
 
 The main focus is on auditory data and there are several submodules that 
-facilitate reading and converting data. However, the estimators may be just 
-as well applied to data from different modalities, e.g., visual or somatosensory 
-system.
+facilitate reading and converting data. However, the estimators may just 
+as well be applied to data from different modalities, e.g., the visual or 
+somatosensory system.
 
-Note that a version of this package with revised structure reflecting the 
-model/method structure from our recent SRF review [12] can be found in the 
-*srf-review* branch. However, it might still need a bit of work to make sure 
-everything is fully functional.
 
-Included models
-===============
+Included estimators
+===================
 
-* Spike-triggered average (STA, [1])
-* Normalized reverse correlation (NRC, [2])
-* Ridge regression [3]
-* Generalized linear model (GLM, [4,5])
-* Maximum informative dimensions (MID, [6]); requires external software
-* Classification-based receptive field estimation (CbRF, [7])
-* Time-varying RF estimation using non-zero mean priors [8]
-* Stochastic gradient descent-based version version of some of the above 
-algorithms [9]
+* Ridge regression (Machens et al. (2004))
+* Automatic smoothness determination (ASD, Sahani & Linden (2003))
+* Automatic locality determination (ALD, Park & Pillow (2011))
+* Spike-triggered average (STA, deBoer & Kuyper (1968))
+* Normalized reverse correlation (NRC, Theunissen et al. (2000))
+* Generalized linear model (GLM, Paninski (2004), Truccolo et al. (2005))
+* Maximum informative dimensions (MID, Sharpee et al. (2004)); requires external software
+* Classification-based receptive field estimation (CbRF, Meyer et al. (2014a))
+* Time-varying RF estimation using non-zero mean priors (Meyer et al. (2014b))
+* Stochastic gradient descent-based versions of some of the above 
+estimators (Meyer et al. (2015))
 
 Moreover, the toolbox has been designed such that most models can be used with
 a number of different priors, e.g., Gaussian and Laplace priors, and also 
@@ -162,28 +163,31 @@ External software
 
 References
 ==========
-[1] deBoer E and Kuyper P: Triggered Correlation. IEEE Transactions on Biomedical Engineering, BM15, 169-179, 1968.
+A.F. Meyer, R.S. Williamson, J.F. Linden, M. Sahani. Models of neuronal stimulus-response functions: elaboration, estimation and evaluation. Front. Syst. Neurosci. 2017.
 
-[2] Theunissen FE, Sen K, and Doupe AJ: Spectral-temporal receptive fields of nonlinear auditory neurons obtained using natural sounds. J Neurosci, 20, 2315-2331, 2000.
+M. Sahani & J.F. Linden. Evidence Optimization Techniques for Estimating Stimulus-Response Functions. NIPS, 2003, 317-324.
 
-[3] Machens CK, Wehr MS, and Zador AM: Linearity of cortical receptive fields measured with natural sounds. J Neurosci, 24, 1089-1100, 2004.
+M. Park & J.W. Pillow. Receptive field inference with localized priors. PLoS Comput Biol, 2011, 7, e1002219.
 
-[4] Paninski L: Maximum likelihood estimation of cascade point-process neural encoding models. Network, 15, 243-262, 2004.
+E. deBoer & P. Kuyper. Triggered Correlation. IEEE Transactions on Biomedical Engineering, BM15, 169-179, 1968.
 
-[5] Truccolo W, Eden UT, Fellows MR, Donoghue JP, and Brown EN: A point process framework for relating neural spiking activity to spiking history, neural ensemble, and extrinsic covariate effects. J Neurophysiol, 93, 1074-1089, 2005.
+F.E. Theunissen, K. Sen, A.J. Doupe. Spectral-temporal receptive fields of nonlinear auditory neurons obtained using natural sounds. J Neurosci, 20, 2315-2331, 2000.
 
-[6] Sharpee T, Rust NC,and Bialek W: Analyzing neural responses to natural signals: maximally informative dimensions. Neural Comput, 16, 223-250, 2004.
+C.K. Machens, M.S. Wehr, A.M. Zador. Linearity of cortical receptive fields measured with natural sounds. J Neurosci, 24, 1089-1100, 2004.
 
-[7] Meyer AF, Diepenbrock JP, Happel MF, Ohl FW, and Anemüller J: Discriminative Learning of Receptive Fields from Responses to Non-Gaussian Stimulus Ensembles. PLOS ONE, 9, e93062, 2014.
+L. Paninski. Maximum likelihood estimation of cascade point-process neural encoding models. Network, 15, 243-262, 2004.
 
-[8] Meyer AF, Diepenbrock JP, Happel MF, Ohl FW, and Anemüller J: Temporal variability of spectro-temporal receptive fields in the anesthetized auditory cortex. Front Comput Neurosci, 8, 165, 2014.
+W. Truccolo, U.T. Eden, M.R. Fellows, J.P. Donoghue, E.N. Brown. A point process framework for relating neural spiking activity to spiking history, neural ensemble, and extrinsic covariate effects. J Neurophysiol, 93, 1074-1089, 2005.
 
-[9] Meyer AF, Diepenbrock JP, Happel MF, Ohl FW, and Anemüller J: Fast and robust estimation of spectro-temporal receptive fields using stochastic approximations. J Neurosci Methods, 246, 119-133, 2015.
+T. Sharpee, N.C. Rust, W. Bialek. Analyzing neural responses to natural signals: maximally informative dimensions. Neural Comput, 16, 223-250, 2004.
 
-[10] Lin CJ, Weng RC, and Keerthi SS: Trust Region Newton Method for Logistic Regression J. Mach. Learn. Res., 9, 627-650, 2008.
+A.F. Meyer AF, J.P Diepenbrock, M.F. Happel, F.W. Ohl, J. Anemüller. Discriminative Learning of Receptive Fields from Responses to Non-Gaussian Stimulus Ensembles. PLOS ONE, 9, e93062, 2014.
 
-[11] Hohmann V: Frequency analysis and synthesis using a Gammatone filterbank ACTA ACUSTICA UNITED WITH ACUSTICA, 88, 433-442, 2002.
+A.F. Meyer AF, J.P Diepenbrock, M.F. Happel, F.W. Ohl, J. Anemüller. Temporal variability of spectro-temporal receptive fields in the anesthetized auditory cortex. Front Comput Neurosci, 8, 165, 2014.
 
-[12] Meyer AF, Williamson R, Linden JF, and Sahani M. Models of neuronal stimulus-response functions: elaboration, estimation and evaluation. Front. Syst. Neurosci., 2017, 10, 109.
+A.F. Meyer AF, J.P Diepenbrock, M.F. Happel, F.W. Ohl, J. Anemüller. Fast and robust estimation of spectro-temporal receptive fields using stochastic approximations. J Neurosci Methods, 246, 119-133, 2015.
 
+C.J. Lin, R.C. Weng, S.S. Keerthi. Trust Region Newton Method for Logistic Regression J. Mach. Learn. Res., 9, 627-650, 2008.
+
+V. Hohmann. Frequency analysis and synthesis using a Gammatone filterbank ACTA ACUSTICA UNITED WITH ACUSTICA, 88, 433-442, 2002.
 

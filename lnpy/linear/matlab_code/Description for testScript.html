@@ -1,0 +1,342 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>testScript</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-02-12"><meta name="m-file" content="testScript"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Testscript for testing ALDs, ALDf, and ALDsf for 1D, 2D, &amp; 3D stimuli</a></li><li><a href="#2">Add a path to use functions in the 'tools' folder</a></li><li><a href="#3">1D stimuli example</a></li><li><a href="#4">2D stimuli example</a></li><li><a href="#5">3D stimuli example</a></li></ul></div><h2>Testscript for testing ALDs, ALDf, and ALDsf for 1D, 2D, &amp; 3D stimuli<a name="1"></a></h2><pre class="codeinput"><span class="comment">% 1D, 2D, and 3D simulated example code:</span>
+<span class="comment">%</span>
+<span class="comment">% Important variables &amp; functions:</span>
+<span class="comment">%   nstim: # of stimuli</span>
+<span class="comment">%   nsevar: noise variance</span>
+<span class="comment">%   nkt  = number of time samples of x (stimulus) to use to predict y (response).</span>
+<span class="comment">%   filterdims = dimension of input stimulus</span>
+<span class="comment">%        e.g.) 1D: nx (if nkt=1)</span>
+<span class="comment">%              2D: [nkt; nx] or [ny; nx]</span>
+<span class="comment">%              3D: [nkt; ny; nx]</span>
+<span class="comment">%   whichstim: choose either white noise or correlated stimuli</span>
+<span class="comment">%</span>
+<span class="comment">% genkTrue.m generates true RF by the difference of two Gaussians</span>
+<span class="comment">% genStim.m generates chosen stimuli</span>
+<span class="comment">% runALD.m provides RF estimates using empirical Bayes with ALDs,f,sf priors</span>
+<span class="comment">%</span>
+<span class="comment">% Updated: 17/01/2012 by Mijung Park &amp; Jonathan Pillow</span>
+</pre><h2>Add a path to use functions in the 'tools' folder<a name="2"></a></h2><pre class="codeinput">addpath(<span class="string">'tools/'</span>);
+</pre><h2>1D stimuli example<a name="3"></a></h2><pre class="codeinput">clear;
+clc;
+
+nstim = 1000; <span class="comment">% number of stimuli</span>
+nsevar = 1; <span class="comment">%  noise variance</span>
+
+<span class="comment">% true filter with spatial dimension nx, difference of two Gaussians.</span>
+filterdims = 100;
+ktrue = genkTrue(filterdims); <span class="comment">% ktrue in 1d</span>
+<span class="comment">% plot(ktrue);</span>
+
+<span class="comment">% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)</span>
+whichstim = 2; <span class="comment">% white noise stimuli, if you want 1/f stimuli, set "whichstim=1"</span>
+Stimuli = genStim(filterdims, nstim, whichstim);
+
+<span class="comment">% 2. generate noisy response: training &amp; test data</span>
+ytraining = Stimuli.xTraining*ktrue + randn(nstim,1)*nsevar; <span class="comment">% training data</span>
+<span class="comment">% ytest = Stimuli.xTest*ktrue + randn(nstim,1)*nsevar; % test data (for cross-validation)</span>
+
+<span class="comment">% 3. ALDs,f,sf, ML, and ridge regression</span>
+nkt = 1;
+[khatALD kridge] = runALD(Stimuli.xTraining, ytraining, filterdims, nkt);
+
+figure(1);
+plot([ktrue, kridge, khatALD.khatSF]);
+legend(<span class="string">'true'</span>, <span class="string">'ridge'</span>, <span class="string">'ALDsf'</span>);
+</pre><h2>2D stimuli example<a name="4"></a></h2><pre class="codeinput">clear;
+clc;
+
+nstim = 2500; <span class="comment">% number of samples</span>
+nsevar = 1; <span class="comment">% noise variance</span>
+
+<span class="comment">% true filter (2d-Gabor) with length ny by nx</span>
+ny = 18;
+nx = 18;
+filterdims = [ny; nx]; <span class="comment">% spatial dimensions</span>
+ktrue = genkTrue(filterdims); <span class="comment">% ktrue in 2d</span>
+<span class="comment">% plot(ktrue(:)); imagesc(ktrue); colormap gray ; axis xy</span>
+
+RF_reshaped = reshape(ktrue, [], 1);
+
+<span class="comment">% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)</span>
+whichstim = 2; <span class="comment">% white noise stimuli, if you want 1/f stimuli, set "whichstim=1"</span>
+Stimuli = genStim(filterdims, nstim, whichstim);
+
+<span class="comment">% 2. generate noisy response: training &amp; test data</span>
+ytraining = Stimuli.xTraining*RF_reshaped + randn(nstim,1)*nsevar; <span class="comment">% training data</span>
+<span class="comment">% ytest = Stimuli.xTest*RF_reshaped + randn(nstim,1)*nsevar; % test data</span>
+
+<span class="comment">% 3. ALDs,f,sf, ML, and ridge regression</span>
+nkt=1;
+[khatALD kridge] = runALD(Stimuli.xTraining, ytraining, filterdims, nkt);
+
+figure(2);
+subplot(131);imagesc(ktrue); colormap <span class="string">gray</span>; axis <span class="string">image</span>; title(<span class="string">'true'</span>);
+subplot(132);imagesc(reshape(kridge, ny, nx)); axis <span class="string">image</span>; title(<span class="string">'ridge'</span>);
+subplot(133);imagesc(reshape(khatALD.khatSF, ny, nx)); axis <span class="string">image</span>; title(<span class="string">'ALDsf'</span>);
+</pre><h2>3D stimuli example<a name="5"></a></h2><pre class="codeinput">clear;
+clc;
+
+nstim = 2000; <span class="comment">% number of samples</span>
+nsevar = 0.5; <span class="comment">% noise variance</span>
+
+<span class="comment">% true filter (3d-Gabor) with length nt by ny by nx</span>
+<span class="comment">% Note: if total dimensionality is too high, this code becomes slow (our future work will solve this issue).</span>
+nkt = 8;
+ny = 6;
+nx = 6;
+
+spatialdims = [ny; nx]; <span class="comment">% spatial dimension of input stimulus</span>
+filterdims = [nkt; spatialdims]; <span class="comment">% filter dimensions</span>
+ktrue = genkTrue(filterdims); <span class="comment">% ktrue in 3d</span>
+
+<span class="comment">% plotting true k</span>
+<span class="comment">% for i=1:nkt</span>
+<span class="comment">%     imagesc(ktrue(:,:,i)); colormap gray; axis image;</span>
+<span class="comment">%     pause(0.2);</span>
+<span class="comment">% end</span>
+
+ktrue_perm = permute(ktrue, [3 1 2]); <span class="comment">% time axis is the first</span>
+
+RF_reshaped = reshape(ktrue_perm, [], 1); <span class="comment">% reshape to a vector</span>
+
+<span class="comment">% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)</span>
+whichstim = 2; <span class="comment">%  white noise stimuli, if you want 1/f stimuli, set "whichstim=1"</span>
+Stimuli = genStim(filterdims, nstim, whichstim);
+
+<span class="comment">% 2. generate noisy response: training &amp; test data</span>
+ytraining = Stimuli.xTraining*RF_reshaped + randn(nstim,1)*nsevar; <span class="comment">% training data</span>
+<span class="comment">% ytest = Stimuli.xTest*RF_reshaped + randn(nstim,1)*nsevar; % test data</span>
+
+<span class="comment">% 3. ALDs,f,sf, ML, and ridge regression</span>
+[khatALD kRidge] = runALD(Stimuli.xraw_training, ytraining, spatialdims, nkt);
+
+<span class="comment">% 4. plot ALDsf estimate</span>
+kRidge_rsh = permute(reshape(kRidge, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);
+<span class="comment">% kALD_rsh = permute(reshape(khatALD.khatS, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);</span>
+<span class="comment">% kALD_rsh = khatALD.khatF; % ALDf is already rearranged in time and space</span>
+kALD_rsh = permute(reshape(khatALD.khatSF, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);
+
+figure(3);
+<span class="keyword">for</span> i=1:nkt
+    subplot(231); imagesc(ktrue(:,:,i)); colormap <span class="string">gray</span>; axis <span class="string">image</span>; title(<span class="string">'true'</span>)
+    subplot(232); imagesc(kRidge_rsh(:,:,i)); colormap <span class="string">gray</span>; axis <span class="string">image</span>; title(<span class="string">'ridge'</span>)
+    subplot(233); imagesc(kALD_rsh(:,:,i)); colormap <span class="string">gray</span>; axis <span class="string">image</span>; title(<span class="string">'ALDsf'</span>)
+    subplot(234); plot(ktrue(:,:,i)); title(<span class="string">'true'</span>);
+    subplot(235); plot(kRidge_rsh(:,:,i)); title(<span class="string">'ridge'</span>);
+    subplot(236); plot(kALD_rsh(:,:,i)); title(<span class="string">'ALDsf'</span>);
+
+    pause(1);
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Testscript for testing ALDs, ALDf, and ALDsf for 1D, 2D, & 3D stimuli 
+
+% 1D, 2D, and 3D simulated example code:
+% 
+% Important variables & functions:
+%   nstim: # of stimuli
+%   nsevar: noise variance   
+%   nkt  = number of time samples of x (stimulus) to use to predict y (response).
+%   filterdims = dimension of input stimulus
+%        e.g.) 1D: nx (if nkt=1) 
+%              2D: [nkt; nx] or [ny; nx]
+%              3D: [nkt; ny; nx]
+%   whichstim: choose either white noise or correlated stimuli
+%
+% genkTrue.m generates true RF by the difference of two Gaussians
+% genStim.m generates chosen stimuli 
+% runALD.m provides RF estimates using empirical Bayes with ALDs,f,sf priors
+%
+% Updated: 17/01/2012 by Mijung Park & Jonathan Pillow
+
+%% Add a path to use functions in the 'tools' folder
+
+addpath('tools/');
+
+%% 1D stimuli example
+
+clear;
+clc;
+
+nstim = 1000; % number of stimuli
+nsevar = 1; %  noise variance
+
+% true filter with spatial dimension nx, difference of two Gaussians.
+filterdims = 100;
+ktrue = genkTrue(filterdims); % ktrue in 1d
+% plot(ktrue);
+
+% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)
+whichstim = 2; % white noise stimuli, if you want 1/f stimuli, set "whichstim=1"
+Stimuli = genStim(filterdims, nstim, whichstim);
+ 
+% 2. generate noisy response: training & test data
+ytraining = Stimuli.xTraining*ktrue + randn(nstim,1)*nsevar; % training data
+% ytest = Stimuli.xTest*ktrue + randn(nstim,1)*nsevar; % test data (for cross-validation)
+
+% 3. ALDs,f,sf, ML, and ridge regression
+nkt = 1; 
+[khatALD kridge] = runALD(Stimuli.xTraining, ytraining, filterdims, nkt);
+
+figure(1); 
+plot([ktrue, kridge, khatALD.khatSF]);
+legend('true', 'ridge', 'ALDsf');
+
+%% 2D stimuli example
+
+clear;
+clc;
+
+nstim = 2500; % number of samples
+nsevar = 1; % noise variance
+
+% true filter (2d-Gabor) with length ny by nx
+ny = 18;
+nx = 18; 
+filterdims = [ny; nx]; % spatial dimensions
+ktrue = genkTrue(filterdims); % ktrue in 2d
+% plot(ktrue(:)); imagesc(ktrue); colormap gray ; axis xy
+
+RF_reshaped = reshape(ktrue, [], 1);
+
+% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)
+whichstim = 2; % white noise stimuli, if you want 1/f stimuli, set "whichstim=1"
+Stimuli = genStim(filterdims, nstim, whichstim);
+
+% 2. generate noisy response: training & test data
+ytraining = Stimuli.xTraining*RF_reshaped + randn(nstim,1)*nsevar; % training data
+% ytest = Stimuli.xTest*RF_reshaped + randn(nstim,1)*nsevar; % test data
+
+% 3. ALDs,f,sf, ML, and ridge regression
+nkt=1;
+[khatALD kridge] = runALD(Stimuli.xTraining, ytraining, filterdims, nkt);
+
+figure(2);
+subplot(131);imagesc(ktrue); colormap gray; axis image; title('true');
+subplot(132);imagesc(reshape(kridge, ny, nx)); axis image; title('ridge');
+subplot(133);imagesc(reshape(khatALD.khatSF, ny, nx)); axis image; title('ALDsf');
+
+%% 3D stimuli example
+
+clear;
+clc;
+
+nstim = 2000; % number of samples
+nsevar = 0.5; % noise variance
+
+% true filter (3d-Gabor) with length nt by ny by nx
+% Note: if total dimensionality is too high, this code becomes slow (our future work will solve this issue).        
+nkt = 8;
+ny = 6;
+nx = 6; 
+
+spatialdims = [ny; nx]; % spatial dimension of input stimulus
+filterdims = [nkt; spatialdims]; % filter dimensions
+ktrue = genkTrue(filterdims); % ktrue in 3d
+
+% plotting true k
+% for i=1:nkt
+%     imagesc(ktrue(:,:,i)); colormap gray; axis image;
+%     pause(0.2);
+% end
+
+ktrue_perm = permute(ktrue, [3 1 2]); % time axis is the first
+
+RF_reshaped = reshape(ktrue_perm, [], 1); % reshape to a vector
+
+% 1. generate stimuli (choose either 1/f stimuli or white noise stimuli)
+whichstim = 2; %  white noise stimuli, if you want 1/f stimuli, set "whichstim=1"
+Stimuli = genStim(filterdims, nstim, whichstim);
+
+% 2. generate noisy response: training & test data
+ytraining = Stimuli.xTraining*RF_reshaped + randn(nstim,1)*nsevar; % training data
+% ytest = Stimuli.xTest*RF_reshaped + randn(nstim,1)*nsevar; % test data
+
+% 3. ALDs,f,sf, ML, and ridge regression
+[khatALD kRidge] = runALD(Stimuli.xraw_training, ytraining, spatialdims, nkt);
+
+% 4. plot ALDsf estimate
+kRidge_rsh = permute(reshape(kRidge, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);
+% kALD_rsh = permute(reshape(khatALD.khatS, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);
+% kALD_rsh = khatALD.khatF; % ALDf is already rearranged in time and space
+kALD_rsh = permute(reshape(khatALD.khatSF, [nkt, spatialdims(1), spatialdims(2)]), [2 3 1]);
+
+figure(3);
+for i=1:nkt
+    subplot(231); imagesc(ktrue(:,:,i)); colormap gray; axis image; title('true')
+    subplot(232); imagesc(kRidge_rsh(:,:,i)); colormap gray; axis image; title('ridge')
+    subplot(233); imagesc(kALD_rsh(:,:,i)); colormap gray; axis image; title('ALDsf')
+    subplot(234); plot(ktrue(:,:,i)); title('true');
+    subplot(235); plot(kRidge_rsh(:,:,i)); title('ridge');
+    subplot(236); plot(kALD_rsh(:,:,i)); title('ALDsf');
+    
+    pause(1);
+end
+
+##### SOURCE END #####
+--></body></html>
