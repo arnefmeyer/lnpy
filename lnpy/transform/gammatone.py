@@ -24,6 +24,8 @@
 
 """
 
+from __future__ import print_function
+
 import numpy as np
 import math
 
@@ -275,7 +277,7 @@ class GammatoneFilterbank(BaseTransform):
             for i, ii in enumerate(chunk_ind):
 
                 if self.verbose:
-                    print "processing chunk {}/{}".format(i+1, n_chunks)
+                    print("processing chunk {}/{}".format(i+1, n_chunks))
 
                 xx = wrapper.process(n_channels, self.order,
                                      pars[0], pars[1], pars[2], pars[3],

@@ -8,6 +8,8 @@
     Generalized linear models
 """
 
+from __future__ import print_function
+
 import numpy as np
 from sklearn.linear_model import Ridge as _Ridge
 from scipy.linalg import solve
@@ -88,7 +90,6 @@ class Ridge(LinearBaseEstimator):
         optimize = self.optimize
 
         if optimize:
-            print "lnpy.glm fit optimize"
             if self.grid_parameters is None:
                 self.grid_parameters = dict()
 

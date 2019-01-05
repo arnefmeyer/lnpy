@@ -8,6 +8,8 @@
     NOT WORKING YET!
 """
 
+from __future__ import print_function
+
 import numpy as np
 
 
@@ -20,11 +22,11 @@ def fit_context_model(S, y, J, K, M, N, reg_iter=3, max_iter=100,
     mse_before = 1e12
     for i in range(max_iter):
 
-        print "iter %d/%d" % (i+1, max_iter)
+        print("iter {}/{}".format(i+1, max_iter))
 
         for j, model in enumerate(models):
 
-            print "  step %d/%d" % (j+1, len(models))
+            print("  step {}/{}".format(j+1, len(models)))
             sys.stdout.flush()
 
             if j == 0:
@@ -39,13 +41,13 @@ def fit_context_model(S, y, J, K, M, N, reg_iter=3, max_iter=100,
                                           T, J, K, M, N, c2, pad_zeros=False)
 
         mse = np.mean((y - y_pred)**2)
-        print "  mean squared error: %g" % mse
+        print("  mean squared error: %g" % mse)
 
         # Check termination conditionl
         rel_err = np.abs(mse_before - mse) / mse
         if i >= reg_iter and rel_err <= tol:
-            print "Relative error (%g) smaller than tolerance (%g)." \
-                  "Exiting" % (rel_err, tol)
+            print("Relative error (%g) smaller than tolerance (%g)." \
+                  "Exiting" % (rel_err, tol))
             break
 
         mse_before = mse

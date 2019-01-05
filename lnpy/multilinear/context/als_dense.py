@@ -12,6 +12,8 @@
     Matlab implementations.
 """
 
+from __future__ import print_function
+
 import numpy as np
 import sys
 
@@ -87,12 +89,12 @@ def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
     mse_before = 1e12
     for i in range(max_iter):
 
-        print "iter %d/%d" % (i+1, max_iter)
+        print("iter {}/{}".format(i+1, max_iter))
         sys.stdout.flush()
 
         for j, model in enumerate(models):
 
-            print "  step %d/%d" % (j+1, len(models))
+            print("  step %d/%d" % (j+1, len(models)))
             sys.stdout.flush()
 
             XX = []
@@ -122,14 +124,14 @@ def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
         Y_pred = np.concatenate(Y_pred)
 
         mse = np.mean((y - y_pred)**2)
-        print "  mean squared error: %g" % mse
+        print("  mean squared error: %g" % mse)
         sys.stdout.flush()
 
         # Check termination conditionl
         rel_err = np.abs(mse_before - mse) / mse
         if i >= reg_iter and rel_err <= tol:
-            print "Relative error (%g) smaller than tolerance (%g)." \
-                  "Exiting" % (rel_err, tol)
+            print("Relative error (%g) smaller than tolerance (%g)." \
+                  "Exiting" % (rel_err, tol))
             break
 
 #        elif mse > mse_before:

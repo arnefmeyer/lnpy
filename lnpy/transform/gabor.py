@@ -15,7 +15,8 @@ Issue 5, pp. 4134-4151 (2012)
 
 """
 
-from __future__ import division
+from __future__ import print_function, division
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid.axes_grid import ImageGrid
@@ -245,7 +246,7 @@ class GaborFilterbank(BaseTransform):
         for filt in filters:
 
             if verbose:
-                print "%d/%d" % (cnt+1, len(filters))
+                print("{}/{}".format(cnt+1, len(filters)))
 
             z = filt.process(X, output_type='real')
             Z.append(z)
@@ -254,8 +255,6 @@ class GaborFilterbank(BaseTransform):
         Y = np.rollaxis(Y, 0, 3)
         fm = np.arange(Y.shape[2])
         modspec = ModulationSpectrogram(Y, fs, time=t, f_center=fc, f_mod=fm)
-#        modspec = GaborSpectrogram(Y, fs, time=t, f_center=fc,
-#                                   filters=filters)
 
         return modspec
 

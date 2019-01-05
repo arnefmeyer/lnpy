@@ -7,9 +7,11 @@
 """
     Cluster computing classes
 
-    TODO: backend classes, e.g., GridEngineBackend and SlurmBackend
-
+    Note that this submodule has been moved to a separate package:
+    https://github.com/arnefmeyer/clusterjobs
 """
+
+from _future__ import print_function
 
 import os
 from os import makedirs
@@ -137,8 +139,8 @@ class ClusterJob():
             backend = _detect_backend()
 
         if self.compute_local or backend is None:
-            print "Could not detect HPC backend." \
-                  "Computing on local computer instead!"
+            print("Could not detect HPC backend." \
+                  "Computing on local computer instead!")
 
             cmd = ''
             env_vars = self.env_vars
@@ -168,11 +170,11 @@ class ClusterJob():
                 cmd = 'sbatch %s' % batch_file
 
             if self.verbose:
-                print 'Submitting job'
-                print '  backend:', backend
-                print '  temporary directory: %s' % self.tempdir
-                print '  script file: %s' % script_file
-                print '  arguments:', self.arguments
+                print('Submitting job')
+                print('  backend:', backend)
+                print('  temporary directory: %s' % self.tempdir)
+                print('  script file: %s' % script_file)
+                print('  arguments:', self.arguments)
 
             os.system(cmd)
 
@@ -323,8 +325,8 @@ class ClusterBatch():
                 break
 
         if self.verbose:
-            print "temp. dir: %s" % tmpdir
-            print "log dir: %s" % logdir
+            print("temp. dir: %s" % tmpdir)
+            print("log dir: %s" % logdir)
 
         # Create combinations of all parameters
         paramkeys = self.parameters.keys()
@@ -341,7 +343,7 @@ class ClusterBatch():
         jobs = []
         n_jobs = len(params)
         if self.verbose:
-            print "creating %d jobs ..." % n_jobs,
+            print("creating {} jobs ... ".format(n_jobs), end="")
             t0 = time()
 
         for i in range(n_jobs):
@@ -381,8 +383,8 @@ class ClusterBatch():
             jobs.append(job)
 
         if self.verbose:
-            print "done in %0.2f seconds" % (time() - t0)
-            print "submitting jobs using qsub ...",
+            print("done in %0.2f seconds" % (time() - t0))
+            print("submitting jobs using qsub ... ", end="")
             t0 = time()
 
         if self.compute_local and self.n_parallel != 1:
@@ -399,7 +401,7 @@ class ClusterBatch():
                 job.submit()
 
         if self.verbose:
-            print "done in %0.2f seconds" % (time() - t0)
+            print("done in %0.2f seconds" % (time() - t0))
 
 
 if __name__ == '__main__':
@@ -410,11 +412,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         data = np.load(sys.argv[1])
         a = data['a'].item()
-        print "starting job", a
+        print("starting job", a)
 
         X = np.random.randn(1000, 1000)
         whatever = np.linalg.svd(X)
-        print "finished job", a
+        print("finished job", a)
 
     else:
         user_dir = expanduser('~')
@@ -425,7 +427,10 @@ if __name__ == '__main__':
 
         script_file = __file__
         params = {'a': range(10)}
-        batch = ClusterBatch(script_file, params, test_dir, verbose=True,
-                             compute_local=False, n_parallel=-1, queue='test',
+        batch = ClusterBatch(script_file, params, test_dir,
+                             verbose=True,
+                             compute_local=False,
+                             n_parallel=-1,
+                             queue='test',
                              mem_request=1000)
         batch.submit()

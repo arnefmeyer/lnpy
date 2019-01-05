@@ -8,7 +8,7 @@
     Generalized linear models (GLMs) for receptive field estimation
 """
 
-from __future__ import division
+from __future__ import print_function, division
 
 import numpy as np
 import time

@@ -8,6 +8,8 @@
     Adapted sklearn cv-based grid search to LNP estimation setting
 """
 
+from __future__ import print_function
+
 import numpy as np
 import time
 import sys
@@ -280,7 +282,7 @@ class ParamSearchCV(object):
 
                 param_grid[key] = new_values
                 print_s += " | " + s
-            print print_s
+            print(print_s)
 
             sys.stdout.flush()
 
@@ -370,7 +372,7 @@ class CVEvaluator():
 
             if i+1 in eval_folds:
                 if verbose:
-                    print 25 * '-', 'Fold %d/%d' % (i+1, n_folds), 25 * '-'
+                    print(25 * '-', 'Fold %d/%d' % (i+1, n_folds), 25 * '-')
 
                 # Learn model
                 if Y.ndim > 1:
@@ -394,7 +396,7 @@ class CVEvaluator():
                     value = scorer._score_func(y_test, z)
                     results[name].append(value)
 
-                print ""
+                print("")
 
             else:
                 for name in scorer_names:
@@ -406,9 +408,9 @@ class CVEvaluator():
     def print_summary(self):
         """output formatted summary of results"""
 
-        print "------------------------------------------------------"
-        print "CVEvaluator results"
-        print "------------------------------------------------------"
+        print("------------------------------------------------------")
+        print("CVEvaluator results")
+        print("------------------------------------------------------")
 
         results = self.results
         scorer_names = get_scorer_names(self.scorers)
@@ -416,9 +418,9 @@ class CVEvaluator():
 
         for j, name in enumerate(scorer_names):
             x = np.asarray(results[name])[eval_folds - 1]
-            print "%s:" % name, np.mean(x), "+-", np.std(x)
+            print("%s:" % name, np.mean(x), "+-", np.std(x))
 
-        print "------------------------------------------------------"
+        print("------------------------------------------------------")
 
     def _get_folds(self):
 

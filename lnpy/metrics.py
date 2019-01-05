@@ -8,7 +8,7 @@
     Some helper for LNP model estimation
 """
 
-from __future__ import division
+from __future__ import print_function, division
 
 import numpy as np
 from sklearn.metrics import r2_score
@@ -331,9 +331,9 @@ def srfpower(yy, indep_noise=False, verbose=False):
         Esignal = np.sqrt(e1 + e2)
 
     if verbose:
-        print "signal power = %g +/- %g" % (Psignal, Esignal)
-        print "noise power = %g" % Pnoise
-        print "s/n power ratio = %g +/- %g" % (Psignal/Pnoise, Esignal/Pnoise)
+        print("signal power = %g +/- %g" % (Psignal, Esignal))
+        print("noise power = %g" % Pnoise)
+        print("s/n power ratio = %g +/- %g" % (Psignal/Pnoise, Esignal/Pnoise))
 
     return Psignal, Pnoise, Esignal
 

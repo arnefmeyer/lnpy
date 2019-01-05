@@ -16,6 +16,8 @@
     Remark: Currently, only the 1D solver is working properly!
 """
 
+from __future__ import print_function
+
 import os
 from os import listdir, remove, chdir, makedirs
 from os.path import join, exists, split
@@ -46,8 +48,9 @@ class MID(LNPEstimator):
                 tempdir - temporary directory
 
         """
-#        super(MID, self).__init__(self)
-        (location, _) = os.path.split(__file__)
+
+        location = os.path.split(__file__)[0]
+
         self.bins = bins
         self.n_iter = n_iter
         self.tempdir = tempdir
@@ -55,8 +58,11 @@ class MID(LNPEstimator):
         self.n_iter2 = n_iter2
         if n_iter2 is None:
             self.n_iter2 = n_iter
+
         self.coef_ = None
         self.intercept_ = 0.
+        self.t_total = None
+
         self.__exe_1D = join(location, 'mid1d')
         self.__exe_2D = join(location, 'midnd')
 
@@ -116,7 +122,7 @@ class MID(LNPEstimator):
             self.t_total = self.t_fit
             chdir(cwd)
             if status:
-                print "An error occured while calling mid1d"
+                print("An error occured while calling mid1d")
 
             # Read first MID from binary file
             if self.ndim == 1:
@@ -131,8 +137,8 @@ class MID(LNPEstimator):
 
         finally:
             # Clean up
-            tmpfiles = [f for f in listdir(temp) if prefix in f]
-            for f in tmpfiles:
+            tmp_files = [f for f in listdir(temp) if prefix in f]
+            for f in tmp_files:
                 remove(join(temp, f))
 
     def __params2xml__(self, prefix, xmlfile, stim_file, resp_file, rfsize,
