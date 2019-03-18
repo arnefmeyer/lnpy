@@ -5,7 +5,7 @@
 # License: GPLv3
 
 """
-    Adapted sklearn cv-based grid search to LNP estimation setting
+    Adapt sklearn cv-based grid search to SRF estimation setting
 """
 
 from __future__ import print_function
@@ -13,11 +13,18 @@ from __future__ import print_function
 import numpy as np
 import time
 import sys
+import six
 
-from sklearn.grid_search import GridSearchCV
-from sklearn.cross_validation import StratifiedKFold, KFold
 from sklearn.metrics import make_scorer, r2_score, roc_auc_score
 from sklearn.base import clone as _clone_estimator
+try:
+    from sklearn.grid_search import GridSearchCV
+    from sklearn.cross_validation import StratifiedKFold, KFold
+    _old_sklearn_version = True
+except ImportError:
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.model_selection import StratifiedKFold, KFold
+    _old_sklearn_version = False
 
 from ..metrics import MI, coherence, logLikelihood
 
@@ -150,14 +157,20 @@ scorer_r_squared = make_scorer(_calc_r_squared, greater_is_better=True,
 
 def get_scorer_from_name(name):
 
-    fn = None
-    exec('fn = scorer_%s' % name)
+    dd = {}
+    exec('fn = scorer_%s' % name, globals(), dd)
+    fn = dd['fn']
+
     return fn
 
 
 def get_scorer_name(scorer):
 
-    name = scorer._score_func.func_name
+    try:
+        name = scorer._score_func.func_name
+    except:
+        name = str(scorer)[12:-1]
+
     if name.startswith('_calc_'):
         name = name[6:]
 
@@ -178,12 +191,19 @@ def get_scorer_names(scorers):
 
 class ParamSearchCV(object):
 
-    def __init__(self, model, param_grid, param_info=None, n_griditer=5,
-                 n_jobs=-1, scorer=scorer_AUC, verbose=1, n_folds=5,
-                 stratify_folds=True, fit_final=True, random_state=0,
+    def __init__(self, model, param_grid,
+                 param_info=None,
+                 n_griditer=5,
+                 n_jobs=-1,
+                 scorer=scorer_AUC,
+                 verbose=1,
+                 n_folds=5,
+                 stratify_folds=True,
+                 fit_final=True,
+                 random_state=0,
                  param_scaling='log2'):
 
-        if isinstance(scorer, str):
+        if isinstance(scorer, six.string_types):
             scorer = get_scorer_from_name(scorer)
 
         self.model = model
@@ -206,16 +226,28 @@ class ParamSearchCV(object):
     def fit(self, X, Y):
 
         n_folds = self.n_folds
+
         if self.stratify_folds:
             if Y.ndim == 1:
                 y = Y
             else:
                 y = np.sum(Y, axis=1)
-            cv = StratifiedKFold(y, n_folds=n_folds)
+
+            if _old_sklearn_version:
+                cv = StratifiedKFold(y, n_folds=n_folds)
+            else:
+                cv = StratifiedKFold(n_splits=n_folds)
 
         else:
-            cv = KFold(Y.shape[0], n_folds=n_folds, shuffle=False,
-                       random_state=self.random_state)
+            if _old_sklearn_version:
+                cv = KFold(Y.shape[0],
+                           n_folds=n_folds,
+                           shuffle=False,
+                           random_state=self.random_state)
+            else:
+                cv = KFold(n_folds,
+                           shuffle=False,
+                           random_state=self.random_state)
 
         model = self.model
         scorer = self.scorer
@@ -250,7 +282,10 @@ class ParamSearchCV(object):
 
             for key in grid.best_params_.keys():
 
-                param_hist.append(grid.grid_scores_)
+                try:
+                    param_hist.append(grid.grid_scores_)
+                except:
+                    param_hist.append(grid.cv_results_['mean_test_score'])
 
                 # "zoom in"
                 best_param = grid.best_params_[key]
@@ -295,7 +330,7 @@ class ParamSearchCV(object):
             model.fit(X, Y)
 
 
-class CVEvaluator():
+class CVEvaluator(object):
     """Model evaluation using cross-validation
 
     Parameters
@@ -356,11 +391,19 @@ class CVEvaluator():
                 y = Y
             else:
                 y = np.sum(Y, axis=1)
-            cv = StratifiedKFold(y, n_folds=n_folds)  # , indices=True)
+
+            if _old_sklearn_version:
+                cv = StratifiedKFold(y, n_folds=n_folds)
+            else:
+                cv = StratifiedKFold(n_splits=n_folds)
 
         else:
-            cv = KFold(X.shape[0], n_folds,  # indices=True,
-                       random_state=random_state)
+            if _old_sklearn_version:
+                cv = KFold(X.shape[0], n_folds,
+                           random_state=random_state)
+            else:
+                cv = KFold(n_folds,
+                           random_state=random_state)
 
         results = {'n_folds': n_folds, 'scorers': scorer_names,
                    'eval_folds': eval_folds}

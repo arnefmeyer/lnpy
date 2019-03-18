@@ -13,7 +13,7 @@ from __future__ import print_function, division
 import numpy as np
 import time
 
-from base import LNPEstimator
+from .base import LNPEstimator
 from ..learn.grid_search import ParamSearchCV
 from ..learn import LogLoss
 from ..learn import GaussianPrior

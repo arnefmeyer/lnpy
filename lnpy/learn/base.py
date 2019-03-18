@@ -12,9 +12,9 @@ import numpy as np
 from sklearn.base import BaseEstimator as SKBaseEstimator
 from sklearn.base import ClassifierMixin
 from sklearn.base import clone as _clone
-from pyhelper import PyDenseProblem, PySparseProblem
 import warnings
 
+from .pyhelper import PyDenseProblem, PySparseProblem
 from .grid_search import ParamSearchCV
 
 

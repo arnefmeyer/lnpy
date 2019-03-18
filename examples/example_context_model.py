@@ -9,6 +9,8 @@
     implementations of the alternating least squares (ALS) algorithm
 """
 
+from __future__ import print_function
+
 import numpy as np
 from os.path import split, join
 import matplotlib.pyplot as plt
@@ -44,8 +46,8 @@ def run_toy_example():
     model.show(show_now=False)
     y_pred = model.predict(X)
 
-    print "MSE =", np.mean((y - y_pred)**2)
-    print "var(y) =", np.var(y)
+    print("MSE =", np.mean((y - y_pred)**2))
+    print("var(y) =", np.var(y))
 
     fig = plt.figure()
 

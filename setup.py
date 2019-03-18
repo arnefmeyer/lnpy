@@ -19,18 +19,23 @@ with open(os.path.join(fpath, 'README.md')) as f:
 
 # Custom clean command to remove build artifacts
 class CleanCommand(_clean):
+
     description = "Remove build artifacts from the source tree"
 
     def run(self):
+
         _clean.run(self)
         if os.path.exists('build'):
             shutil.rmtree('build')
+
         for dirpath, dirnames, filenames in os.walk('lnpy'):
+
             for filename in filenames:
                 if (filename.endswith('.so') or filename.endswith('.pyd')
                         or filename.endswith('.dll')
                         or filename.endswith('.pyc')):
                     os.unlink(os.path.join(dirpath, filename))
+
             for dirname in dirnames:
                 if dirname == '__pycache__':
                     shutil.rmtree(os.path.join(dirpath, dirname))
@@ -40,6 +45,7 @@ cmdclass = {'clean': CleanCommand}
 
 
 def configuration(parent_package='', top_path=None):
+
     if os.path.exists('MANIFEST'):
         os.remove('MANIFEST')
 
@@ -57,13 +63,18 @@ def configuration(parent_package='', top_path=None):
 
 
 def setup_package():
+
+    import setuptools
+    from numpy.distutils.core import setup
+
     metadata = dict(name='lnpy',
+                    packages=setuptools.find_packages(),
                     maintainer='Arne F. Meyer',
                     maintainer_email='arne.f.meyer@gmail.com',
                     description=DESCRIPTION,
                     license='GPLv3',
                     url='http://www.github.com/arnefmeyer/lnpy',
-                    version='0.2',
+                    version='0.3',
                     download_url='http://www.github.com/arnefmeyer/lnpy',
                     long_description=LONG_DESCRIPTION,
                     classifiers=['Intended Audience :: Science/Research',
@@ -79,20 +90,7 @@ def setup_package():
                                  ],
                     cmdclass=cmdclass)
 
-    if (len(sys.argv) >= 2 and ('--help' in sys.argv[1:] or sys.argv[1]
-            in ('--help-commands', 'egg_info', '--version', 'clean'))):
-
-        try:
-            from setuptools import setup
-        except ImportError:
-            from distutils.core import setup
-
-        metadata['version'] = 0.2
-    else:
-        from numpy.distutils.core import setup
-
-        metadata['configuration'] = configuration
-
+    metadata['configuration'] = configuration
     setup(**metadata)
 
 

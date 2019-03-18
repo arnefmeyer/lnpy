@@ -17,9 +17,9 @@ from scipy import signal
 from scipy.interpolate import interp1d
 from scipy.io.wavfile import read as _waveread
 
-import util
-
 from sklearn.base import BaseEstimator as SKBaseEstimator
+
+from . import util
 
 
 class BaseEstimator(SKBaseEstimator):

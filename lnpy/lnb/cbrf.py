@@ -33,7 +33,7 @@ import numpy as np
 import time
 import warnings
 
-from base import LNBEstimator
+from .base import LNBEstimator
 from ..learn.svm import SVM
 from ..learn.sgd import SGD, ASGD
 from ..learn import GaussianPrior, SquaredHingeLoss
@@ -82,7 +82,7 @@ class CbRF(LNBEstimator):
         self.gamma = gamma
 
     def fit(self, X, Y):
-        """Ttain model and extract parameters"""
+        """Train model and extract parameters"""
 
         prior = self.prior
         n_spikefilt = self.n_spikefilt
@@ -95,9 +95,13 @@ class CbRF(LNBEstimator):
             nw = nx - n_spikefilt
             prior.set_ndim(nw)
 
-        model = SVM(prior=prior, verbose=0, tolerance=.1,
-                    bias_multiplier=1., weighting='inv_prob',
-                    alpha=self.alpha, gamma=self.gamma)
+        model = SVM(prior=prior,
+                    verbose=0,
+                    tolerance=.1,
+                    bias_multiplier=1.,
+                    weighting='inv_prob',
+                    alpha=self.alpha,
+                    gamma=self.gamma)
 
         labels = np.unique(Y)
         if np.sum(labels == np.array([-1, 1])) != len(labels):
@@ -122,8 +126,10 @@ class CbRF(LNBEstimator):
             n_jobs = grid_params['n_jobs']
             grid = ParamSearchCV(model, param_grid, param_info,
                                  n_griditer=n_griditer,
-                                 n_jobs=n_jobs, verbose=verbose,
-                                 scorer=self.metric, fit_final=True)
+                                 n_jobs=n_jobs,
+                                 verbose=verbose,
+                                 scorer=self.metric,
+                                 fit_final=True)
 
             t0 = time.time()
             grid.fit(X, Y)

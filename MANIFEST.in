@@ -1,4 +1,5 @@
 recursive-include lnpy *.py *.c *.cpp *.h *.pyx *.pxd
+include lnpy/lnb/cbrf.py
 include lnpy/transform/src/gammatone/README
 include lnpy/learn/src/code/COPYRIGHT
 prune lnpy/io

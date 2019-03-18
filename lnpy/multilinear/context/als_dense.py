@@ -19,10 +19,7 @@ import sys
 
 from ...linear import ASD
 
-import context_fast as ctxtools
-
-
-from ipdb import set_trace as db
+from . import context_fast as ctxtools
 
 
 def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,

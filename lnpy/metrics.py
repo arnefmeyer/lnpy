@@ -16,7 +16,7 @@ from pylab import mlab
 import matplotlib.pyplot as plt
 from scipy import stats
 
-import fast_tools
+from . import fast_tools
 from .plotting import set_font_axes
 
 

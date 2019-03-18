@@ -17,10 +17,10 @@ from scipy.sparse import rand as sprand
 from scipy.ndimage.filters import gaussian_filter
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from als_dense import fit_context_model as _fit_context_als
-from als_dense import predict_response_context as _predict_response_context
-from vb_dense import fit_context_model as _fit_context_vb
-import context_fast
+from .als_dense import fit_context_model as _fit_context_als
+from .als_dense import predict_response_context as _predict_response_context
+from .vb_dense import fit_context_model as _fit_context_vb
+from . import context_fast
 
 
 def create_toy_data(T=1000, J=9, K=9, M=5, N=2, dt=0.02, c1=0., c2=1., c3=0.,

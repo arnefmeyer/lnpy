@@ -13,11 +13,11 @@
 from __future__ import division
 
 import numpy as np
-from base import LinearBaseEstimator
+from .base import LinearBaseEstimator
 from . import (
     DenseProblem, SparseProblem, GaussianLoss
 )
-import pyhelper
+from . import pyhelper
 
 
 class BaseSGDEstimator(LinearBaseEstimator):
