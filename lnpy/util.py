@@ -136,6 +136,33 @@ def segment(data, seg_len, shift, zero_padding=True):
     return out
 
 
+def segment_spectrogram(S, lag, order='C',
+                        prepend_zeros=False,
+                        flip_temp=False,
+                        add_ones=False):
+    """create lag vectors from spectrogram"""
+
+    nf = S.shape[1]
+    nt = lag
+    p = nt * nf
+
+    if prepend_zeros:
+        S = np.vstack((np.zeros((lag-1, nf)), S))
+
+    if flip_temp:
+        f = lambda x: np.flipud(x)
+    else:
+        f = lambda x: x
+
+    N = S.shape[0] - nt + 1
+    X = np.ones((N, p + int(add_ones)))
+    for i in range(N):
+        xx = S[i:i+nt, :p]
+        X[i, :p] = f(xx).ravel(order=order)
+
+    return X
+
+
 class DataConverter(object):
     """Converts neo block to stimulus and response matrices
 
