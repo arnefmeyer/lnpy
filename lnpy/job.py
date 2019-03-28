@@ -11,7 +11,7 @@
     https://github.com/arnefmeyer/clusterjobs
 """
 
-from _future__ import print_function
+from __future__ import print_function
 
 import os
 from os import makedirs
