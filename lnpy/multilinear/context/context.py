@@ -143,7 +143,7 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
     ax.set_ylabel('Frequency (%s)' % f_unit)
     images.append(im)
 
-    # Set time ticks for STRF and PRF
+    # Set ticks for STRF and PRF
     for ax in axarr[:1+plot_STRF]:
         if timeticks_prf is not None:
             ax.set_xticks(timeticks_prf)
