@@ -315,12 +315,13 @@ class ContextModel(BaseEstimator, RegressorMixin):
                       kwarg_names=kwarg_names, output_names=output_names)
 
         results = res['results']
-        w_prf = results['w_prf'].item()
-        w_cgf = results['w_cgf'].item()
-        w_strf = results['w_strf'].item()
-        b_prf = results['b_prf'].item()
-        b_cgf = results['b_cgf'].item()
-        pred_resp = results['predicted_response'].item()
+
+        w_strf = results.strf.ww
+        w_cgf = results.full_rank_sparse_rep.wtauphi
+        b_cgf = 0.
+        w_prf = results.full_rank_sparse_rep.wtf
+        b_prf = results.full_rank_sparse_rep.c
+        pred_resp = results.full_rank_sparse_rep.predictedResp
 
         if self.validate > 0:
             self._tpp_cgf = results['tpp_cgf'].item().ravel()
