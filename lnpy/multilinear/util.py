@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-from ..util import set_font_axes
+from ..plotting import set_font_axes
 
 
 def plot_avg_and_profiles_CGF(W_cgfs, shape, dt=0.02, colorbar=True,
@@ -21,7 +21,7 @@ def plot_avg_and_profiles_CGF(W_cgfs, shape, dt=0.02, colorbar=True,
     fig = plt.figure(figsize=(8, 2.5))
 
     M = shape[0] - 1
-    N = (shape[1] - 1) / 2
+    N = int((shape[1] - 1) / 2.)
     extent = (-M*dt*1000, 0, -N - .5, N + .5)
 
     # Average CGF
