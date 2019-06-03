@@ -250,10 +250,19 @@ class ContextModel(BaseEstimator, RegressorMixin):
 
     """
 
-    def __init__(self, J=15, M=12, N=10, algorithm='als_dense',
-                 max_iter=100, reg_iter=3, als_solver='iter',
-                 init_params_cgf=[6., 2., 2.], smooth_min=0.5,
-                 tolerance=1e-5, validate=0, init_params_prf=[7, 4, 4]):
+    def __init__(self,
+                 J=15,
+                 M=12,
+                 N=10,
+                 algorithm='als_dense',
+                 max_iter=100,
+                 reg_iter=3,
+                 als_solver='iter',
+                 init_params_cgf=[6., 2., 2.],
+                 smooth_min=0.5,
+                 tolerance=1e-5,
+                 validate=False,
+                 init_params_prf=[7, 4, 4]):
 
         self.J = J
         self.M = M
@@ -276,6 +285,8 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.w_cgf = None
         self.b_cgf = 0.
 
+        self._validation = {}
+
     def fit(self, X, y):
 
         algo = self.algorithm.lower()
@@ -292,7 +303,8 @@ class ContextModel(BaseEstimator, RegressorMixin):
         code_dir = join(split(__file__)[0], 'context_code')
         mat_func = 'fit_fullrank_context_inputs'
 
-        y = np.atleast_2d(y).T
+        if y.ndim == 1:
+            y = np.atleast_2d(y).T
 
         input_dict = dict(X=X,
                           y=y,
@@ -311,8 +323,11 @@ class ContextModel(BaseEstimator, RegressorMixin):
         output_names = ['results']
 
         mc = MatlabCaller(addpath=code_dir)
-        res = mc.call(mat_func, input_dict=input_dict, input_order=input_order,
-                      kwarg_names=kwarg_names, output_names=output_names)
+        res = mc.call(mat_func,
+                      input_dict=input_dict,
+                      input_order=input_order,
+                      kwarg_names=kwarg_names,
+                      output_names=output_names)
 
         results = res['results']
 
@@ -323,11 +338,16 @@ class ContextModel(BaseEstimator, RegressorMixin):
         b_prf = results.full_rank_sparse_rep.c
         pred_resp = results.full_rank_sparse_rep.predictedResp
 
-        if self.validate > 0:
-            self._tpp_cgf = results['tpp_cgf'].item().ravel()
-            self._pp_cgf = results['pp_cgf'].item().ravel()
-            self._tpp_strf = results['tpp_strf'].item().ravel()
-            self._pp_strf = results['pp_strf'].item().ravel()
+        if self.validate:
+            self._validation = {'pred_power_train_context': results.full_rank_sparse_rep.tpp,
+                                'pred_power_cv_context': results.full_rank_sparse_rep.pp,
+                                'pred_power_train_strf': results.strf.tpp,
+                                'pred_power_cv_strf': results.strf.pp,
+                                'signal_power': results.stats.signalpower,
+                                'noise_power': results.stats.noisepower,
+                                'error': results.stats.error}
+        else:
+            self._validation = {}
 
         b_strf = w_strf[0]
         w_strf = np.reshape(w_strf[1:], w_prf.shape, order='F')
