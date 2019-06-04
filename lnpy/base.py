@@ -19,8 +19,6 @@ from scipy.io.wavfile import read as _waveread
 
 from sklearn.base import BaseEstimator as SKBaseEstimator
 
-from . import util
-
 
 class BaseEstimator(SKBaseEstimator):
     """For convenience we derive all estimators from sklearn's base class"""
@@ -207,6 +205,9 @@ class Stimulus(Signal):
         """Resample simulus"""
 
         if samplerate != self.samplerate:
+
+            from . import util
+
             self.data = util.resample(self.data, self.samplerate,
                                       samplerate, axis=0,
                                       algorithm=algorithm)
@@ -352,6 +353,8 @@ class Spectrogram(Signal):
         """Resample spectrogram in temporal direction"""
 
         if fs != self.samplerate:
+
+            from . import util
 
             t = self.time
             if t is not None:

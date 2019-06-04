@@ -22,9 +22,15 @@ from ...linear import ASD
 from . import context_fast as ctxtools
 
 
-def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
-                      c2=1., tol=1e-5, wrap_around=True, solver='iter',
-                      smooth_min=1e-3, init_params_cgf=[6., 2., 2.],
+def fit_context_model(S, Y, J, K, M, N,
+                      reg_iter=3,
+                      max_iter=100,
+                      c2=1.,
+                      tol=1e-5,
+                      wrap_around=True,
+                      solver='iter',
+                      smooth_min=1e-3,
+                      init_params_cgf=[6., 2., 2.],
                       init_params_prf=[7, 4, 4]):
 
     assert isinstance(S, (np.ndarray, list)), \
@@ -46,14 +52,22 @@ def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
         S_pad.append(s_pad)
 
     # Initialize context parameters using STRF estimate
-    model_strf = ASD(D=(J, K), fit_intercept=True, verbose=True, maxiter=100,
-                     stepsize=0.01, solver=solver, init_params=init_params_prf,
-                     smooth_min=smooth_min, tolerance=0.1)
+    model_strf = ASD(D=(J, K),
+                     fit_intercept=True,
+                     verbose=True,
+                     maxiter=100,
+                     stepsize=0.01,
+                     solver=solver,
+                     init_params=init_params_prf,
+                     smooth_min=smooth_min,
+                     tolerance=0.1)
 
     SS = []
     YY = []
     for s, y in zip(S, Y):
-        SS.append(segment_spectrogram(s, J, order='C', prepend_zeros=False))
+        SS.append(segment_spectrogram(s, J,
+                                      order='C',
+                                      prepend_zeros=False))
         YY.append(y[J-1:])
 
     SS = np.concatenate(SS)
@@ -66,22 +80,35 @@ def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
     init_params_cgf = np.asarray(init_params_cgf)
 
     # Create PRF and CGF models
-    model_prf = ASD(D=(J, K), fit_intercept=True, verbose=True, maxiter=100,
-                    stepsize=0.01, solver=solver, init_params=init_params_prf,
-                    init_coef=1e-3 * np.ones((J*K)), init_intercept=0.1,
-                    smooth_min=smooth_min, tolerance=0.1)
+    model_prf = ASD(D=(J, K),
+                    fit_intercept=True,
+                    verbose=True,
+                    maxiter=100,
+                    stepsize=0.01,
+                    solver=solver,
+                    init_params=init_params_prf,
+                    init_coef=1e-3 * np.ones((J*K)),
+                    init_intercept=0.1,
+                    smooth_min=smooth_min,
+                    tolerance=0.1)
     model_prf.noisevar = model_strf.noisevar
 
-    model_cgf = ASD(D=(M+1, 2*N+1), fit_intercept=False, verbose=True,
+    model_cgf = ASD(D=(M+1, 2*N+1),
+                    fit_intercept=False,
+                    verbose=True,
                     maxiter=100,
-                    stepsize=0.01, solver=solver, init_params=init_params_cgf,
+                    stepsize=0.01,
+                    solver=solver,
+                    init_params=init_params_cgf,
                     init_coef=-1e-3 * np.ones(((M+1)*(2*N+1),)),
-                    init_intercept=1., smooth_min=smooth_min, tolerance=0.1)
+                    init_intercept=1.,
+                    smooth_min=smooth_min,
+                    tolerance=0.1)
 
     models = [model_prf, model_cgf]
 
     T = y.shape[0]
-    y = y.flatten()
+    Y_measured = np.concatenate(Y)
 
     mse_before = 1e12
     for i in range(max_iter):
@@ -120,20 +147,23 @@ def fit_context_model(S, Y, J, K, M, N, reg_iter=3, max_iter=100,
 
         Y_pred = np.concatenate(Y_pred)
 
-        mse = np.mean((y - y_pred)**2)
-        print("  mean squared error: %g" % mse)
+        mse = np.mean((Y_pred - Y_measured)**2)
+        print("  mean squared error: {:.3f}".format(mse))
         sys.stdout.flush()
 
-        # Check termination conditionl
+        # Check termination condition
         rel_err = np.abs(mse_before - mse) / mse
-        if i >= reg_iter and rel_err <= tol:
-            print("Relative error (%g) smaller than tolerance (%g)." \
-                  "Exiting" % (rel_err, tol))
-            break
+        if i >= reg_iter:
 
-#        elif mse > mse_before:
-#            print "Error increased. Exiting."
-#            break
+            if rel_err <= tol:
+                print("Relative error ({:.6f}) smaller than tolerance ({:.6f})."
+                      "Exiting".format(rel_err, tol))
+                break
+
+            elif mse > mse_before:
+                print("Absolute error is increasing from {:.3f} to {:.3f}. Exiting.".format(
+                    mse_before, mse))
+                break
 
         mse_before = mse
 
