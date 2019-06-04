@@ -15,7 +15,9 @@ from sklearn.decomposition import PCA
 from ..plotting import set_font_axes
 
 
-def plot_avg_and_profiles_CGF(W_cgfs, shape, dt=0.02, colorbar=True,
+def plot_avg_and_profiles_CGF(W_cgfs, shape,
+                              dt=0.02,
+                              colorbar=True,
                               cmap='RdBu_r'):
 
     fig = plt.figure(figsize=(8, 2.5))
@@ -31,8 +33,12 @@ def plot_avg_and_profiles_CGF(W_cgfs, shape, dt=0.02, colorbar=True,
     ax.set_title('Average CGF')
     vmax = np.max(np.abs(w_avg))
     veps = max(1e-12 * vmax, 1e-12)
-    ax.imshow(w_avg[::-1, :].T, vmin=-vmax - veps, vmax=vmax + veps,
-              cmap=cmap, extent=extent, aspect='auto',
+    ax.imshow(w_avg[::-1, :].T,
+              vmin=-vmax - veps,
+              vmax=vmax + veps,
+              cmap=cmap,
+              extent=extent,
+              aspect='auto',
               interpolation='nearest')
     ax.set_xlabel('Time shift (ms)')
     ax.set_ylabel('Frequency shift')
@@ -43,13 +49,21 @@ def plot_avg_and_profiles_CGF(W_cgfs, shape, dt=0.02, colorbar=True,
     tt = np.linspace(-M*dt*1000, 0, shape[0])
     tp_all = W_cgfs[:, N::shape[1]]
     tp_avg = w_avg[::-1, N]
-    w_std = np.reshape(np.std(W_cgfs, axis=0), shape)
+    w_std = np.reshape(np.std(W_cgfs,
+                              axis=0) / np.sqrt(W_cgfs.shape[0]), shape)
     tp_std = w_std[::-1, N]
 
-    ax.plot(tt, tp_all[:, ::-1].T, '-', color=3*[.8], linewidth=1, zorder=0)
-    ax.plot(tt, tp_avg, '-', color=[200/255., 30/255., 15/255.], linewidth=2)
-    ax.fill_between(tt, tp_avg - tp_std, tp_avg + tp_std, facecolor=3*[.25],
-                    edgecolor=[200/255., 30/255., 15/255.], alpha=.5)
+    ax.plot(tt, tp_all[:, ::-1].T, '-',
+            color=3*[.8],
+            linewidth=1,
+            zorder=0)
+    ax.plot(tt, tp_avg, '-',
+            color=[200/255., 30/255., 15/255.],
+            linewidth=2)
+    ax.fill_between(tt, tp_avg - tp_std, tp_avg + tp_std,
+                    facecolor=3*[.25],
+                    edgecolor=[200/255., 30/255., 15/255.],
+                    alpha=.5)
 
     for ax in fig.axes:
         set_font_axes(ax)

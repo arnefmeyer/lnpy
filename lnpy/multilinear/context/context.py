@@ -65,10 +65,18 @@ def create_toy_data(T=1000, J=9, K=9, M=5, N=2, dt=0.02, c1=0., c2=1., c3=0.,
     return S, S_pad, y, w_prf, w_cgf
 
 
-def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
-                       timeticks_prf=None, timeticks_cgf=None, colorbar=True,
-                       frequencies=None, freqticks=[4000, 8000, 16000, 32000],
-                       logfscale=True, windowtitle=None, axes=None,
+def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
+                       dt=0.02,
+                       cmap='RdBu_r',
+                       timeticks_prf=None,
+                       timeticks_cgf=None,
+                       colorbar=True,
+                       colorbar_num_ticks=3,
+                       frequencies=None,
+                       freqticks=[4000, 8000, 16000, 32000],
+                       logfscale=True,
+                       windowtitle=None,
+                       axes=None,
                        plot_STRF=False):
 
     w_strf = w_strf[::-1, :]
@@ -90,12 +98,14 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
     new_figure = False
     if axes is None:
         new_figure = True
-        fig, axarr = plt.subplots(nrows=1, ncols=n_plots)
+        fig, axes = plt.subplots(nrows=1, ncols=n_plots)
     else:
-        axarr = np.asarray(axes)
-        fig = axarr[0].get_figure()
+        axes = np.asarray(axes)
+        fig = axes[0].get_figure()
 
-    plt_args = dict(interpolation='nearest', aspect='auto', origin='lower')
+    plt_args = dict(interpolation='nearest',
+                    aspect='auto',
+                    origin='lower')
     plot_index = 0
     images = []
 
@@ -118,45 +128,57 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
         f_unit = 'channels'
 
     if plot_STRF:
-        ax1 = axarr[plot_index]
+        ax1 = axes[plot_index]
         plot_index += 1
 
         ax1.set_title('STRF')
-        vmax = np.max(np.abs(w_strf))
-        veps = max(1e-3 * vmax, 1e-12)
+        v_max = np.max(np.abs(w_strf))
+        v_eps = max(1e-3 * v_max, 1e-12)
         extent = (-J*dt*1000, 0, f_extent[0], f_extent[1])
-        im = ax1.imshow(w_strf.T, vmin=-vmax - veps, vmax=vmax + veps,
-                        cmap=cmap, extent=extent, **plt_args)
+        im = ax1.imshow(w_strf.T,
+                        vmin=-v_max - v_eps,
+                        vmax=v_max + v_eps,
+                        cmap=cmap,
+                        extent=extent,
+                        **plt_args)
         ax1.set_xlabel('Time (ms)')
         ax1.set_ylabel('Frequency (%s)' % f_unit)
         images.append(im)
 
-    ax = axarr[plot_index]
+    ax = axes[plot_index]
     plot_index += 1
     ax.set_title('PRF')
-    vmax = np.max(np.abs(w_prf))
-    veps = max(1e-3 * vmax, 1e-12)
+    v_max = np.max(np.abs(w_prf))
+    v_eps = max(1e-3 * v_max, 1e-12)
     extent = (-J*dt*1000, 0, f_extent[0], f_extent[1])
-    im = ax.imshow(w_prf.T, vmin=-vmax - veps, vmax=vmax + veps, cmap=cmap,
-                   extent=extent, **plt_args)
+    im = ax.imshow(w_prf.T,
+                   vmin=-v_max - v_eps,
+                   vmax=v_max + v_eps,
+                   cmap=cmap,
+                   extent=extent,
+                   **plt_args)
     ax.set_xlabel('Time (ms)')
     ax.set_ylabel('Frequency (%s)' % f_unit)
     images.append(im)
 
     # Set ticks for STRF and PRF
-    for ax in axarr[:1+plot_STRF]:
+    for ax in axes[:1+plot_STRF]:
         if timeticks_prf is not None:
             ax.set_xticks(timeticks_prf)
         else:
             ax.xaxis.set_major_locator(MaxNLocator(4))
 
-    ax = axarr[plot_index]
+    ax = axes[plot_index]
     ax.set_title('CGF')
-    vmax = np.max(np.abs(w_cgf))
-    veps = max(1e-3 * vmax, 1e-12)
+    v_max = np.max(np.abs(w_cgf))
+    v_eps = max(1e-3 * v_max, 1e-12)
     extent = (-M*dt*1000, 0, -1 - .5/N, 1 + .5/N)
-    im = ax.imshow(w_cgf.T, vmin=-vmax - veps, vmax=vmax + veps, cmap=cmap,
-                   extent=extent, **plt_args)
+    im = ax.imshow(w_cgf.T,
+                   vmin=-v_max - v_eps,
+                   vmax=v_max + v_eps,
+                   cmap=cmap,
+                   extent=extent,
+                   **plt_args)
     ax.set_xlabel('Time shift (ms)')
     ax.set_ylabel(r'$\Phi$ (oct)')
     ax.set_yticks([-1, 0, 1])
@@ -172,10 +194,12 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N, dt=0.02, cmap='RdBu_r',
         fig.canvas.set_window_title(windowtitle)
 
     if colorbar:
-        for im, ax in zip(images, axarr.tolist()):
+        for im, ax in zip(images, axes.tolist()):
             cbar = plt.colorbar(mappable=im, ax=ax)
-            cbar.locator = MaxNLocator(5)
+            cbar.locator = MaxNLocator(colorbar_num_ticks)
             cbar.update_ticks()
+            cbar.ax.tick_params(labelsize=5,
+                                pad=2)
 
     if new_figure:
         fig.set_size_inches(6 + plot_STRF*2, 2.5)
