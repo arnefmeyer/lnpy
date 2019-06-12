@@ -329,7 +329,7 @@ class ContextModel(BaseEstimator, RegressorMixin):
         mat_func = 'fit_fullrank_context_inputs'
 
         if y.ndim == 1:
-            y = np.atleast_2d(y).T
+            y = np.reshape(y, (y.shape[0], 1))
 
         input_dict = dict(X=X,
                           y=y,
