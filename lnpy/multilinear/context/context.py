@@ -310,6 +310,7 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.b_cgf = 0.
 
         self._validation = {}
+        self.stats = None
 
     def fit(self, X, y):
 
@@ -366,12 +367,13 @@ class ContextModel(BaseEstimator, RegressorMixin):
             self._validation = {'pred_power_train_context': results.full_rank_sparse_rep.tpp,
                                 'pred_power_cv_context': results.full_rank_sparse_rep.pp,
                                 'pred_power_train_strf': results.strf.tpp,
-                                'pred_power_cv_strf': results.strf.pp,
-                                'signal_power': results.stats.signalpower,
-                                'noise_power': results.stats.noisepower,
-                                'error': results.stats.error}
+                                'pred_power_cv_strf': results.strf.pp}
         else:
             self._validation = {}
+
+        self.stats['signal_power'] = results.stats.signalpower
+        self.stats['noise_power'] = results.stats.noisepower
+        self.stats['error_signal'] = results.stats.error
 
         b_strf = w_strf[0]
         w_strf = np.reshape(w_strf[1:], w_prf.shape, order='F')
@@ -395,6 +397,14 @@ class ContextModel(BaseEstimator, RegressorMixin):
             K = X.shape[1]
         else:
             K = X[0].shape[1]
+
+        if isinstance(y, np.ndarray):
+            if y.ndim == 1:
+                y = np.atleast_2d(y).T
+        elif isinstance(y, list):
+            for i, yi in enumerate(y):
+                if yi.ndim == 1:
+                    y[i] = np.atleast_2d(yi).T
 
         max_iter = self.max_iter
         reg_iter = self.reg_iter
@@ -439,6 +449,26 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.b_prf = model_prf.intercept_
         self.w_cgf = w_cgf
         self.b_cgf = model_cgf.intercept_
+
+        if isinstance(y, np.ndarray):
+            p_signal, p_noise, e_signal = srfpower(y)
+            self.stats = {'signal_power': p_signal,
+                          'noise_power': p_noise,
+                          'error_signal': e_signal}
+
+        elif isinstance(y, list):
+            p_signal = []
+            p_noise = []
+            e_signal = []
+            for yi in y:
+                ps, pn, es = srfpower(yi)
+                p_signal.append(ps)
+                p_noise.append(pn)
+                e_signal.append(es)
+
+            self.stats = {'signal_power': np.mean(p_signal),
+                          'noise_power': np.mean(p_noise),
+                          'error_signal': np.mean(e_signal)}
 
     def predict(self, X):
 

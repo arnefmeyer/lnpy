@@ -51,6 +51,11 @@ def fit_context_model(S, Y, J, K, M, N,
         s_pad = pad_stimulus(s, J, K, M, N, wrap_around=wrap_around)
         S_pad.append(s_pad)
 
+    # check if Y contains PSTHs or spike count matrices (context model needs PSTHs)
+    for i, y in enumerate(Y):
+        if y.ndim > 1:
+            Y[i] = np.mean(Y, axis=1)
+
     # Initialize context parameters using STRF estimate
     model_strf = ASD(D=(J, K),
                      fit_intercept=True,
