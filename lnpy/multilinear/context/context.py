@@ -371,9 +371,9 @@ class ContextModel(BaseEstimator, RegressorMixin):
         else:
             self._validation = {}
 
-        self.stats['signal_power'] = results.stats.signalpower
-        self.stats['noise_power'] = results.stats.noisepower
-        self.stats['error_signal'] = results.stats.error
+        self.stats = {'signal_power': results.stats.signalpower,
+                      'noise_power': results.stats.noisepower,
+                      'error_signal': results.stats.error}
 
         b_strf = w_strf[0]
         w_strf = np.reshape(w_strf[1:], w_prf.shape, order='F')
