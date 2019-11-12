@@ -479,7 +479,9 @@ class ContextModel(BaseEstimator, RegressorMixin):
         M = self.M
         N = self.N
         y_pred = _predict_response_context(X, model_prf, model_cgf, T, J,
-                                           K, M, N, c2=1., pad_zeros=True,
+                                           K, M, N,
+                                           c2=1.,
+                                           pad_zeros=True,
                                            wrap_around=True)
 
         return y_pred
@@ -490,8 +492,10 @@ class ContextModel(BaseEstimator, RegressorMixin):
             dt = self.dt
 
         fig = plot_context_model(self.w_strf, self.w_prf, self.w_cgf,
-                                 self.J, self.M, self.N, dt=dt,
-                                 cmap=cmap, **kwargs)
+                                 self.J, self.M, self.N,
+                                 dt=dt,
+                                 cmap=cmap,
+                                 **kwargs)
 
         if show_now:
             plt.show()

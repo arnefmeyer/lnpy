@@ -18,7 +18,8 @@ from ..plotting import set_font_axes
 def plot_avg_and_profiles_CGF(W_cgfs, shape,
                               dt=0.02,
                               colorbar=True,
-                              cmap='RdBu_r'):
+                              cmap='RdBu_r',
+                              **cb_args):
 
     fig = plt.figure(figsize=(8, 2.5))
 
@@ -33,15 +34,20 @@ def plot_avg_and_profiles_CGF(W_cgfs, shape,
     ax.set_title('Average CGF')
     vmax = np.max(np.abs(w_avg))
     veps = max(1e-12 * vmax, 1e-12)
-    ax.imshow(w_avg[::-1, :].T,
-              vmin=-vmax - veps,
-              vmax=vmax + veps,
-              cmap=cmap,
-              extent=extent,
-              aspect='auto',
-              interpolation='nearest')
-    ax.set_xlabel('Time shift (ms)')
+    im = ax.imshow(w_avg[::-1, :].T,
+                   vmin=-vmax - veps,
+                   vmax=vmax + veps,
+                   cmap=cmap,
+                   extent=extent,
+                   aspect='auto',
+                   interpolation='nearest')
+    ax.set_xlabel('Temporal shift (ms)')
     ax.set_ylabel('Frequency shift')
+
+    if colorbar:
+        cb = plt.colorbar(im,
+                          ax=ax,
+                          **cb_args)
 
     # Temporal profile at zero frequency shift
     ax = fig.add_subplot(1, 2, 2)
@@ -70,7 +76,10 @@ def plot_avg_and_profiles_CGF(W_cgfs, shape,
 
     fig.tight_layout()
 
-    return fig
+    if colorbar:
+        return fig, cb
+    else:
+        return fig
 
 
 def plot_PCs_CGF(W_cgfs, shape, dt=0.02, n_PC=3, colorbar=True, cmap='RdBu_r'):
