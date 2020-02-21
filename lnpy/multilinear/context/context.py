@@ -67,7 +67,8 @@ def create_toy_data(T=1000, J=9, K=9, M=5, N=2, dt=0.02, c1=0., c2=1., c3=0.,
 
 def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
                        dt=0.02,
-                       cmap='RdBu_r',
+                       cmap_prf='RdBu_r',
+                       cmap_cgf='RdBu_r',
                        timeticks_prf=None,
                        timeticks_cgf=None,
                        colorbar=True,
@@ -138,7 +139,7 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
         im = ax1.imshow(w_strf.T,
                         vmin=-v_max - v_eps,
                         vmax=v_max + v_eps,
-                        cmap=cmap,
+                        cmap=cmap_prf,
                         extent=extent,
                         **plt_args)
         ax1.set_xlabel('Time (ms)')
@@ -154,7 +155,7 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
     im = ax.imshow(w_prf.T,
                    vmin=-v_max - v_eps,
                    vmax=v_max + v_eps,
-                   cmap=cmap,
+                   cmap=cmap_prf,
                    extent=extent,
                    **plt_args)
     ax.set_xlabel('Time (ms)')
@@ -176,7 +177,7 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
     im = ax.imshow(w_cgf.T,
                    vmin=-v_max - v_eps,
                    vmax=v_max + v_eps,
-                   cmap=cmap,
+                   cmap=cmap_cgf,
                    extent=extent,
                    **plt_args)
     ax.set_xlabel('Time shift (ms)')
@@ -486,7 +487,11 @@ class ContextModel(BaseEstimator, RegressorMixin):
 
         return y_pred
 
-    def show(self, dt=0.02, cmap='RdBu_r', show_now=True, **kwargs):
+    def show(self, dt=0.02, 
+              cmap_prf='RdBu_r', 
+              cmap_cgf='RdBu_r', 
+              show_now=True, 
+              **kwargs):
 
         if hasattr(self, 'dt'):
             dt = self.dt
@@ -494,7 +499,8 @@ class ContextModel(BaseEstimator, RegressorMixin):
         fig = plot_context_model(self.w_strf, self.w_prf, self.w_cgf,
                                  self.J, self.M, self.N,
                                  dt=dt,
-                                 cmap=cmap,
+                                 cmap_prf=cmap_prf,
+                                 cmap_cgf=cmap_cgf,
                                  **kwargs)
 
         if show_now:
