@@ -68,6 +68,8 @@ def create_toy_data(T=1000, J=9, K=9, M=5, N=2, dt=0.02, c1=0., c2=1., c3=0.,
 def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
                        dt=0.02,
                        cmap='RdBu_r',
+                       cmap_prf=None,
+                       cmap_cgf=None,
                        timeticks_prf=None,
                        timeticks_cgf=None,
                        colorbar=True,
@@ -135,10 +137,14 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
         v_max = np.max(np.abs(w_strf))
         v_eps = max(1e-3 * v_max, 1e-12)
         extent = (-J*dt*1000, 0, f_extent[0], f_extent[1])
+        if cmap_prf is not None:
+            cm=cmap_prf
+        else:
+            cm=cmap
         im = ax1.imshow(w_strf.T,
                         vmin=-v_max - v_eps,
                         vmax=v_max + v_eps,
-                        cmap=cmap,
+                        cmap=cm,
                         extent=extent,
                         **plt_args)
         ax1.set_xlabel('Time (ms)')
@@ -151,10 +157,14 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
     v_max = np.max(np.abs(w_prf))
     v_eps = max(1e-3 * v_max, 1e-12)
     extent = (-J*dt*1000, 0, f_extent[0], f_extent[1])
+    if cmap_prf is not None:
+        cm=cmap_prf
+    else:
+        cm=cmap
     im = ax.imshow(w_prf.T,
                    vmin=-v_max - v_eps,
                    vmax=v_max + v_eps,
-                   cmap=cmap,
+                   cmap=cm,
                    extent=extent,
                    **plt_args)
     ax.set_xlabel('Time (ms)')
@@ -173,10 +183,14 @@ def plot_context_model(w_strf, w_prf, w_cgf, J, M, N,
     v_max = np.max(np.abs(w_cgf))
     v_eps = max(1e-3 * v_max, 1e-12)
     extent = (-M*dt*1000, 0, -1 - .5/N, 1 + .5/N)
+    if cmap_cgf is not None:
+        cm=cmap_cgf
+    else:
+        cm=cmap
     im = ax.imshow(w_cgf.T,
                    vmin=-v_max - v_eps,
                    vmax=v_max + v_eps,
-                   cmap=cmap,
+                   cmap=cm,
                    extent=extent,
                    **plt_args)
     ax.set_xlabel('Time shift (ms)')
@@ -486,7 +500,10 @@ class ContextModel(BaseEstimator, RegressorMixin):
 
         return y_pred
 
-    def show(self, dt=0.02, cmap='RdBu_r', show_now=True, **kwargs):
+    def show(self, dt=0.02, cmap='RdBu_r',
+             cmap_prf=None,
+             cmap_cgf=None,
+             show_now=True, **kwargs):
 
         if hasattr(self, 'dt'):
             dt = self.dt
@@ -495,6 +512,8 @@ class ContextModel(BaseEstimator, RegressorMixin):
                                  self.J, self.M, self.N,
                                  dt=dt,
                                  cmap=cmap,
+                                 cmap_prf=cmap_prf,
+                                 cmap_cgf=cmap_cgf,
                                  **kwargs)
 
         if show_now:
