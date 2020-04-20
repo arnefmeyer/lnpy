@@ -40,7 +40,7 @@ mixtures of these priors.
 Dependencies
 ============
 
-lnpy works under Python 2.7 (Python 2.6 and Python 3.x have not been tested) and requires a working C/C++ compiler.
+lnpy works under Python 2.7 and Python 3.6  (other Python versions have not been tested; avoid Python 3.7 as there might be problems with a number of packages) and requires a working C/C++ compiler.
 
 The required dependencies to build the package are
 
@@ -54,26 +54,30 @@ The required dependencies to build the package are
 	* sphinx
 	* sphinxcontrib-napoleon
 
-
 Installation
 ============
 
 Linux
 -----
 
-1. Install the latest version of Python 2.7
+1. Install Python (recommended: [anaconda](https://www.anaconda.com/distribution/))
 
 2. Install dependencies, e.g.,
 
-	pip install numpy scipy matplotlib neo
+	`pip install numpy scipy matplotlib neo`
+	(or `conda install` when using anaconda )
 
-3. Install package by changing into the package directory and typing
+3. Install packages required to build some of the cython extensions:
 
-	python setup.py install
+	`sudo apt installlibc6-dev g++`.
+
+4. Install package by changing into the package directory and typing
+
+	`python setup.py install`
 
    If you just want to compile the code in the package directory use
 
-	python setup.py install build_ext -i
+	`python setup.py install build_ext -i`
 
 
 Windows 7
@@ -157,7 +161,7 @@ External software
 
 	http://www.uni-oldenburg.de/medizin/departments/mediphysik-akustik/mediphysik/downloads/
 
-  You have to download the code and unpack Gfb_analyze.h and Gfb_analyze.h to
+Download the code and unpack Gfb_analyze.h and Gfb_analyze.h to
   lnpy/transform/code/gammatone.
 
 
