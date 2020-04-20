@@ -54,7 +54,7 @@ def fit_context_model(S, Y, J, K, M, N,
     # check if Y contains PSTHs or spike count matrices (context model needs PSTHs)
     for i, y in enumerate(Y):
         if y.ndim > 1:
-            Y[i] = np.mean(Y, axis=1)
+            Y[i] = np.mean(y, axis=1)
 
     # Initialize context parameters using STRF estimate
     model_strf = ASD(D=(J, K),
