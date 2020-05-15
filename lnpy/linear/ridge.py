@@ -16,7 +16,7 @@ from sklearn.utils.extmath import fast_logdet
 try:
     from sklearn.utils.extmath import pinvh
 except ImportError:
-    from sklearn.externals._scipy_linalg import pinvh
+    from scipy.linalg import pinvh
 
 import time
 
