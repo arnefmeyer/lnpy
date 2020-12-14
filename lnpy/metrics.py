@@ -363,8 +363,7 @@ def plot_srfpower(Psignal, Pnoise, Esignal=None, ax=None, ls_line=True,
         xx = np.linspace(vmin, vmax, 100)
         ax.plot(xx, slope * xx + intercept, '-', linewidth=1, color=3*[0])
 
-    set_font_axes(ax, add_size=0, size_ticks=6, size_labels=8,
-                  size_text=8, size_title=8, family='Arial')
+    set_font_axes(ax)
 
     return ax.get_figure()
 

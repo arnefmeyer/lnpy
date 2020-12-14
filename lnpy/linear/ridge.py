@@ -12,7 +12,12 @@ from __future__ import print_function
 
 import numpy as np
 from scipy import linalg, optimize
-from sklearn.utils import extmath
+from sklearn.utils.extmath import fast_logdet
+try:
+    from sklearn.utils.extmath import pinvh
+except ImportError:
+    from scipy.linalg import pinvh
+
 import time
 
 from .base import LinearModel
@@ -57,7 +62,7 @@ def ridge_evidence_iter(X, y, penalize_bias=False, maxvalue=1e6, maxiter=1e3,
         try:
             S = linalg.inv(XTX / noisevar + Cprior_inv)
         except:
-            S = extmath.pinvh(XTX / noisevar + Cprior_inv)
+            S = pinvh(XTX / noisevar + Cprior_inv)
 
         mu = np.dot(S, XTy) / noisevar
 
@@ -106,7 +111,7 @@ def _ridge_evidence_fun_grad(theta, X, y, verbose, other):
     mu = np.dot(SS, Xy)/nv
 
     # (1) Compute log-evidence
-    term1 = .5*(extmath.fast_logdet(2*np.pi*SS) - p*np.log(2*np.pi/alpha)
+    term1 = .5*(fast_logdet(2*np.pi*SS) - p*np.log(2*np.pi/alpha)
                 - p*np.log(2*np.pi*nv))
     term2 = -.5*(yy/nv - np.dot(Xy.T, np.dot(SS, Xy))/nv**2)
     logE = term1 + term2
@@ -305,8 +310,8 @@ def _ridge_smooth_fun_grad(theta, X, y, D, verbose, other):
     mu = np.dot(SS, Xy)/nv
 
     # Compute log-evidence
-    term1 = .5*(extmath.fast_logdet(2*np.pi*SS) - p*np.log(2*np.pi*nv)
-                - p*np.log(2*np.pi) - 1./extmath.fast_logdet(invC))
+    term1 = .5*(fast_logdet(2*np.pi*SS) - p*np.log(2*np.pi*nv)
+                - p*np.log(2*np.pi) - 1./fast_logdet(invC))
     term2 = -.5*(yy/nv - np.dot(Xy.T, np.dot(SS, Xy))/nv**2)
     logE = term1 + term2
 
