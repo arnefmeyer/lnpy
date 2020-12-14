@@ -331,7 +331,7 @@ class ContextModel(BaseEstimator, RegressorMixin):
         # for saving additional information from Matlab implementation
         self._validation = {}
         self._pred_resp = None
-        self._reg_params = None
+        self._matlab_params = None
 
     def fit(self, X, y):
 
