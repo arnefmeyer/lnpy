@@ -21,6 +21,7 @@ from .als_dense import fit_context_model as _fit_context_als
 from .als_dense import predict_response_context as _predict_response_context
 from .vb_dense import fit_context_model as _fit_context_vb
 from . import context_fast
+from ...metrics import srfpower
 
 
 def create_toy_data(T=1000, J=9, K=9, M=5, N=2, dt=0.02, c1=0., c2=1., c3=0.,
@@ -275,9 +276,11 @@ class ContextModel(BaseEstimator, RegressorMixin):
         max_iter : int
             The maximum number of ALS iterations
 
-        reg_iter : int
+        reg_iter : int, array-like
             The number of ALS iterations in which the prior hyperparameters
-            will be optimized (and kept fixed afterwards)
+            will be optimized (and kept fixed afterwards); can be an integer
+            (same number of iterations for CGF and PRF) or array-like
+            (# iter PRF, # iter CGF).
 
         smooth_min : float
             Minimum samount of moothing of the ASD algorithm
@@ -323,8 +326,12 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.w_cgf = None
         self.b_cgf = 0.
 
-        self._validation = {}
         self.stats = None
+
+        # for saving additional information from Matlab implementation
+        self._validation = {}
+        self._pred_resp = None
+        self._reg_params = None
 
     def fit(self, X, y):
 
@@ -334,6 +341,9 @@ class ContextModel(BaseEstimator, RegressorMixin):
 
         elif algo in ['als_dense', 'vb_dense']:
             self._fit_dense(X, y)
+
+        else:
+            raise ValueError("invalid algorithm: {}".format(self.algorithm))
 
     def _fit_matlab(self, X, y):
 
@@ -350,13 +360,10 @@ class ContextModel(BaseEstimator, RegressorMixin):
                           J=float(self.J),
                           M=float(self.M),
                           N=float(self.N),
-                          context_smoothing_choice=1.,
-                          distance_choice=1.,
                           maxiter=self.max_iter,
                           regiter=self.reg_iter,
                           validate=self.validate)
-        input_order = ['X', 'y', 'J', 'M', 'N', 'context_smoothing_choice',
-                       'distance_choice', 'maxiter', 'regiter', 'validate']
+        input_order = ['X', 'y', 'J', 'M', 'N', 'maxiter', 'regiter', 'validate']
         kwarg_names = ['maxiter', 'regiter', 'validate']
 
         output_names = ['results']
@@ -400,6 +407,17 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.b_cgf = b_cgf
         self.b_prf = b_prf
         self._pred_resp = pred_resp
+
+        # save additional parameters
+        self._matlab_params = {'c': results.full_rank_sparse_rep.c,
+                               'contextSmoothing': results.full_rank_sparse_rep.contextSmoothing,
+                               'wtauphi_reg_params': results.full_rank_sparse_rep.wtauphi_reg_params,
+                               'wtf_reg_params': results.full_rank_sparse_rep.wtf_reg_params}
+
+        init_ = []
+        for ss in results.full_rank_sparse_rep.init:
+            init_.append({k: getattr(ss, k) for k in ss._fieldnames})
+        self._matlab_params['init'] = init_
 
     def _fit_dense(self, X, y):
 
@@ -464,7 +482,7 @@ class ContextModel(BaseEstimator, RegressorMixin):
         self.w_cgf = w_cgf
         self.b_cgf = model_cgf.intercept_
 
-        if isinstance(y, np.ndarray):
+        if isinstance(y, np.ndarray) and y.ndim > 1 and y.shape[1] > 1:
             p_signal, p_noise, e_signal = srfpower(y)
             self.stats = {'signal_power': p_signal,
                           'noise_power': p_noise,
