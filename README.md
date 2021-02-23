@@ -1,5 +1,4 @@
-lnpy
-====
+# lnpy
 
 lnpy is a Python module for fitting parameters of neuronal stimulus-response 
 functions (SRFs; for a review see [1]). While initially developed to estimate 
@@ -17,8 +16,7 @@ as well be applied to data from different modalities, e.g., the visual or
 somatosensory system.
 
 
-Included estimators
-===================
+## Included estimators
 
 * Ridge regression (Machens et al. (2004))
 * Automatic smoothness determination (ASD, Sahani & Linden (2003))
@@ -37,10 +35,9 @@ a number of different priors, e.g., Gaussian and Laplace priors, and also
 mixtures of these priors.
 
 
-Dependencies
-============
+## Dependencies
 
-lnpy works under Python 2.7 and Python 3.6  (other Python versions have not been tested; avoid Python 3.7 as there might be problems with a number of packages) and requires a working C/C++ compiler.
+lnpy works under Python 2.7 and Python 3.6  (other Python versions have not been tested but migh work) and requires a working C/C++ compiler.
 
 The required dependencies to build the package are
 
@@ -54,8 +51,8 @@ The required dependencies to build the package are
 	* sphinx
 	* sphinxcontrib-napoleon
 
-Installation
-============
+
+## Installation
 
 Linux
 -----
@@ -80,8 +77,7 @@ Linux
 	`python setup.py install build_ext -i`
 
 
-Windows 7
----------
+### Windows 7
 
 1. Install the latest version of WinPython 2.7.x.x (64 bit version)
 
@@ -123,14 +119,19 @@ Windows 7
 That's all!
 
 
-Some useful links
-=================
+### Compilation of cython files
+
+The package uses [cython](https://cython.org/) to speed up some computations and to wrap C code (e.g., liblinear). However, the C files created by cython are platform-dependent. If installation of the lnpy package fails this might be due to a mismatch between the pre-compiled cython files and the compiler/libraries on the current system. In this case it might be required to recompile the cython files via `make cython`.
+
+
+
+## Some useful links
 
 * Anaconda Python (includes many scientific packages; free version available)
 	http://docs.continuum.io/anaconda/index.html
 
-* Matlab-like IDE: Spyder (included in Anaconda and WinPython)
-	https://pythonhosted.org/spyder/
+* Python IDE: PyCharm
+	https://www.jetbrains.com/pycharm/
 
 * Scientific programming in Python:
 	http://www.scipy.org/
@@ -143,8 +144,7 @@ Some useful links
 	http://matplotlib.org/
 
 
-External software
-=================
+## External software
 
 * The trust region conjugate gradient descent algorithm as described in [8] has been adapted from the liblinear library available at:
 
@@ -165,8 +165,8 @@ Download the code and unpack Gfb_analyze.h and Gfb_analyze.h to
   lnpy/transform/code/gammatone.
 
 
-References
-==========
+## References
+
 A.F. Meyer, R.S. Williamson, J.F. Linden, M. Sahani. Models of neuronal stimulus-response functions: elaboration, estimation and evaluation. Front. Syst. Neurosci. 2017.
 
 M. Sahani & J.F. Linden. Evidence Optimization Techniques for Estimating Stimulus-Response Functions. NIPS, 2003, 317-324.
