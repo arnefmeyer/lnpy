@@ -34,9 +34,9 @@ def fit_context_model(S, Y, J, K, M, N,
                       init_params_prf=[7, 4, 4]):
 
     assert isinstance(S, (np.ndarray, list)), \
-        "stimulus S must be numpy array or list or numpy arrays"
+        "stimulus S must be a numpy array or list or numpy arrays"
     assert isinstance(Y, (np.ndarray, list)), \
-        "response y must be numpy array or list or numpy arrays"
+        "response y must be a numpy array or list or numpy arrays"
 
     assert type(S) == type(Y), "S and y must be of the same type"
 
@@ -53,8 +53,8 @@ def fit_context_model(S, Y, J, K, M, N,
 
     # check if Y contains PSTHs or spike count matrices (context model needs PSTHs)
     for i, y in enumerate(Y):
-        if y.ndim > 1:
-            Y[i] = np.mean(y, axis=1)
+        if y.ndim > 1 and y.shape[1] > 1:
+            Y[i] = np.mean(Y, axis=1)
 
     # Initialize context parameters using STRF estimate
     model_strf = ASD(D=(J, K),
@@ -112,6 +112,16 @@ def fit_context_model(S, Y, J, K, M, N,
 
     models = [model_prf, model_cgf]
 
+    # number of ASD hyperparameter optimization iterations
+    if isinstance(reg_iter, (int)):
+        assert reg_iter >= 0, "reg_iter must be >= 0"
+        reg_iter_models = [int(reg_iter), int(reg_iter)]
+    elif isinstance(reg_iter, (tuple, list, np.ndarray)):
+        assert len(reg_iter) == 2, "len(reg_iter) != 2"
+        reg_iter_models = np.asarray(reg_iter, dtype=np.int)
+    else:
+        raise ValueError("reg_iter must be either an integer or a tuple/list/ndarray ")
+
     T = y.shape[0]
     Y_measured = np.concatenate(Y)
 
@@ -131,17 +141,17 @@ def fit_context_model(S, Y, J, K, M, N,
             for s, y in zip(S_pad, Y):
 
                 if j == 0:
-                    X, y_hat = compute_A_matrix(s, y, models[1], J, K, M, N,
+                    X, y_hat = compute_A_matrix(s, y.ravel(), models[1], J, K, M, N,
                                                 c2)
                 else:
-                    X, y_hat = compute_B_matrix(s, y, models[0], J, K, M, N)
+                    X, y_hat = compute_B_matrix(s, y.ravel(), models[0], J, K, M, N)
 
                 XX.append(X)
                 Y_hat.append(y_hat)
 
             XX = np.concatenate(XX)
             Y_hat = np.concatenate(Y_hat)
-            run_als_update(XX, Y_hat, model, regularize=i < reg_iter)
+            run_als_update(XX, Y_hat, model, regularize=i < reg_iter_models[j])
 
         Y_pred = []
         for s in S_pad:

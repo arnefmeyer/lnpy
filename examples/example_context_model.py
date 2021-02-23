@@ -30,7 +30,7 @@ def run_toy_example():
     N = 2  # frequency lag CGF
 
     max_iter = 100  # max. number of ALS iterations
-    reg_iter = 0  # stop hyperparameter optimization after reg_iter iterations
+    reg_iter = 3  # stop hyperparameter optimization after reg_iter iterations
 
     X, _, y, w_prf, w_cgf = create_toy_data(T=T, J=J, K=K, M=M, N=N,
                                             c1=1., noisevar=.05)
@@ -39,10 +39,13 @@ def run_toy_example():
                              dt=0.02, cmap='RdBu_r', windowtitle='True')
     fig.tight_layout()
 
-    model = ContextModel(J=J, M=M, N=N, algorithm='als_dense',
-                         max_iter=max_iter, reg_iter=reg_iter)
-#    model.fit(X, y)
-    model.fit([X, X], [y, y])
+    model = ContextModel(J=J, M=M, N=N,
+                         algorithm='als_dense',
+                         max_iter=max_iter,
+                         reg_iter=reg_iter,
+                         validate=False)
+    model.fit(X, y)
+
     model.show(show_now=False)
     y_pred = model.predict(X)
 
@@ -57,6 +60,7 @@ def run_toy_example():
     ax.legend()
 
     ax = fig.add_subplot(1, 2, 2)
+    ax.set_title('STRF (from PRF/CGF')
     w_prf = model.w_prf
     w_cgf = model.w_cgf
     c1 = model.b_prf
