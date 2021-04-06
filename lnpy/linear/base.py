@@ -20,7 +20,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from scipy.interpolate import interp1d
 
-from sklearn.linear_model.base import LinearModel as SKLinearModel
+try:
+    from sklearn.linear_model.base import LinearModel as SKLinearModel
+except ImportError:
+    from sklearn.linear_model._base import LinearModel as SKLinearModel
 
 
 def plot_linear_model(w, shape, dt=0.02, cmap='RdBu_r', timeticks=None,
