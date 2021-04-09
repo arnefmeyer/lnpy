@@ -8,13 +8,13 @@
     Plain spike-triggered average (STA) estimator
 """
 
-from base import LNPEstimator
+from lnpy.lnp.base import LNPEstimator
 import numpy as np
 import time
 
 
 class STA(LNPEstimator):
-    """Spike-triggered average (STA) reptive field estimator"""
+    """Spike-triggered average (STA) receptive field estimator"""
 
     def __init__(self, **kwargs):
         super(STA, self).__init__(**kwargs)
